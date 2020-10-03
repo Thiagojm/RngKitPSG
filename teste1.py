@@ -40,23 +40,34 @@ Do not close this window!""")
     sg.theme('DarkBlue')
 
     # TAB 1 - Capture / Analyse
-    acquiring_data = [[sg.T("Choose RNG", size=(16, 1)), sg.T("RAW(0)/XOR(1,2...)", size=(20, 1))],
-                      [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True, size=(19, 1)),
-                       sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
-                                     readonly=True), sg.T("", size=(4, 1)), sg.B("Start", k='ac_button', size=(20, 1))],
-                      [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac", size=(36, 1)),
-                       sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")],
-                      [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac", size=(20, 1))]]
+
+
+    column_1 = [[sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
+        [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
+        [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")]]
+
+    frame_1 = sg.Frame("Choose RNG", layout=column_1, k="frame_1", vertical_alignment="top")
+
+    column_2 = [[sg.T(" ")],
+        [sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False, readonly=True)],
+                [sg.T(" ")]]
+
+    frame_2 = sg.Frame("RAW(0)/XOR(1,2...)", layout=column_2, k="frame_2", vertical_alignment="top", element_justification="center")
+
+    column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))],
+        [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
+
+    frame_3 = sg.Frame("", layout=column_3, k="frame_3", vertical_alignment="top", element_justification="center")
 
     data_analysis = [[sg.Text('Select file:'), sg.Input(),
                       sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
                                     initial_folder="./1-SavedFiles")],
                      [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
 
-    tab1_layout = [
-        [sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-                   [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]
-    ]
+    acquiring_data = [[frame_1, frame_2, frame_3]]
+
+    tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
+        [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
     graph_options = [[sg.T("Choose RNG", size=(20, 1)), sg.T("RAW/XOR", size=(20, 1))],
