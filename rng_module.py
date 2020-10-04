@@ -8,7 +8,6 @@ import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from bitstring import BitArray
 
-
 # Internal imports
 
 def popupmsg(msg_title, msg):

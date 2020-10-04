@@ -15,6 +15,7 @@ from serial.tools import list_ports
 # Internal imports
 import rng_module as rm
 
+# Setting Globals
 global thread_live
 thread_live = False
 global thread_cap
@@ -32,7 +33,7 @@ Wait for the application to load!
 Do not close this window!""")
 
     with open("src/instructions.txt", "r", encoding="utf8") as f:
-        texto = f.read()
+        instruction_text = f.read()
 
     # THEME
     # Good Ones: DarkBlue14, Dark, DarkBlue, DarkBlue3, DarkTeal1, DarkTeal10, DarkTeal9, LightGreen
@@ -88,7 +89,7 @@ Do not close this window!""")
 
     # TAB 3 - Instruções
     tab3_layout = [[sg.T("Instructions", relief="raised", justification="center", size=(70, 1), font=("Calibri, 24"))],
-                   [sg.Multiline(default_text=texto, size=(75, 19), disabled=True, enable_events=False,
+                   [sg.Multiline(default_text=instruction_text, size=(75, 19), disabled=True, enable_events=False,
                                  font=("Calibri, 20"), pad=(5, 5))]]
 
     # LAYOUT
