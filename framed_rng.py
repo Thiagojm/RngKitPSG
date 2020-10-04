@@ -138,7 +138,7 @@ Do not close this window!""")
         # Live Plot on Loop
         ax.plot(index_number_array, zscore_array, color='orange')
         ax.set_title("Live Plot")
-        ax.set_xlabel('Time(s)', fontsize=10)
+        ax.set_xlabel('Number of Samples', fontsize=10)
         ax.set_ylabel('Z-Score', fontsize='medium')
         fig_agg.draw()
     window.close()
@@ -300,8 +300,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
             write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        print(float(interval_value - (end_cap - start_cap)))
-        print(interval_value)
+        #print(float(interval_value - (end_cap - start_cap)))
         try:
             time.sleep(float(interval_value - (end_cap - start_cap)))
         except Exception:
