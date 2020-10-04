@@ -37,7 +37,7 @@ Do not close this window!""")
 
     # THEME
     # Good Ones: DarkBlue14, Dark, DarkBlue, DarkBlue3, DarkTeal1, DarkTeal10, DarkTeal9, LightGreen
-    sg.theme('DarkBlue')
+    sg.theme('DarkTeal1')
 
     # TAB 1 - Capture / Analyse
 
@@ -116,32 +116,41 @@ Do not close this window!""")
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
         elif event == 'ac_button':
-            global thread_cap
-            if not thread_cap:
-                thread_cap = True
-                threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
-                window['ac_button'].update("Stop")
-                window["stat_ac"].update("  Capturing", text_color="green")
+            if rm.test_bit_time_rate(values["ac_bit_count"], values["ac_time_count"]):
+                global thread_cap
+                if not thread_cap:
+                    thread_cap = True
+                    threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
+                    window['ac_button'].update("Stop")
+                    window["stat_ac"].update("  Capturing", text_color="green")
+                else:
+                    thread_cap = False
+                    window['ac_button'].update("Start")
+                    window["stat_ac"].update("        Idle", text_color="orange")
             else:
-                thread_cap = False
-                window['ac_button'].update("Start")
-                window["stat_ac"].update("        Idle", text_color="orange")
+                pass
         elif event == "out_folder":
             rm.open_folder()
         elif event == "Generate":
-            rm.file_to_excel(values["open_file"], values["an_bit_count"], values["an_time_count"])
-        elif event == 'live_plot':
-            global thread_live
-            if not thread_live:
-                thread_live = True
-                ax.clear()
-                threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
-                window['live_plot'].update("Stop")
-                window["stat_live"].update("  Capturing", text_color="green")
+            if rm.test_bit_time_rate(values["an_bit_count"], values["an_time_count"]):
+                rm.file_to_excel(values["open_file"], values["an_bit_count"], values["an_time_count"])
             else:
-                thread_live = False
-                window['live_plot'].update("Start")
-                window["stat_live"].update("        Idle", text_color="orange")
+                pass
+        elif event == 'live_plot':
+            if rm.test_bit_time_rate(values["live_bit_count"], values["live_time_count"]):
+                global thread_live
+                if not thread_live:
+                    thread_live = True
+                    ax.clear()
+                    threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
+                    window['live_plot'].update("Stop")
+                    window["stat_live"].update("  Capturing", text_color="green")
+                else:
+                    thread_live = False
+                    window['live_plot'].update("Start")
+                    window["stat_live"].update("        Idle", text_color="orange")
+            else:
+                pass
         # Live Plot on Loop
         ax.plot(index_number_array, zscore_array, color='orange')
         ax.set_title("Live Plot")

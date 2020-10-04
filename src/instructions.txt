@@ -1,10 +1,9 @@
 # RngKit 2.0
 by Thiago Jung
-github Thiagojm
+https://github.com/Thiagojm/RngKitPSG
 thiagojm1984@hotmail.com
 Written in Python 3.7.9
 -----------------------
-
 
 # ABSTRACT
 
@@ -44,9 +43,15 @@ To analyse the file and generate a Excel file with z-score and a graph, select a
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
 This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to go there.
 
-- TAB 2: The third tab is for collecting and presenting a live Zscore x Time chart.
+- TAB 2: The second tab is for collecting and presenting a live Zscore x Time chart.
 Select the device to use (BitBabbler can be set to 0 (RAW) or 1 (XOR)).
 Click on "Start", the chart will update and at the same time two files will be generated and saved(.bin and .csv).
 When you finish capturing it is important to click "Stop".
 
 - TAB 3: Instructions Tab
+
+# License
+
+MIT License
+
+Copyright (c) 2020 Thiago Jung Mendaçolli
