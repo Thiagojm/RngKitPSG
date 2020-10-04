@@ -52,10 +52,8 @@ Do not close this window!""")
                                     initial_folder="./1-SavedFiles")],
                      [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
 
-    tab1_layout = [
-        [sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-                   [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]
-    ]
+    tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
+        [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
     graph_options = [[sg.T("Choose RNG", size=(20, 1)), sg.T("RAW/XOR", size=(20, 1))],

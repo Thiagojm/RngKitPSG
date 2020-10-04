@@ -32,17 +32,10 @@ def open_folder():
     os.startfile(path)
 
 
-def increase(index_number_array, zscore_array):
-    index_number_array.append(index_number_array[-1] + 1)
-    zscore_array.append(zscore_array[-1] + 1)
-    time.sleep(1)
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
-    print("Current Time =", current_time)
-
-
 # ----------------- Analyse Data --------------------------
 def file_to_excel(data_file, an_bit_count, an_time_count):
+    sg.PopupQuickMessage("Working, please wait... this could take a few seconds.", background_color="Grey",
+                         font="Calibri, 18", auto_close_duration=1)
     an_bit_count = int(an_bit_count)
     an_time_count = int(an_time_count)
     if data_file == "":
@@ -65,7 +58,7 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
         popupmsg('File Saved', 'Saved as ' + file_to_save)
         return
     elif data_file[-3:] == "bin":
-        sg.PopupQuickMessage("Working, please wait... this could take many seconds.", background_color="Grey",
+        sg.PopupQuickMessage("Working, please wait... this could take a few seconds.", background_color="Grey",
                              font="Calibri, 18", auto_close_duration=2)
         with open(data_file, "rb") as file:  # open binary file
             bin_hex = BitArray(file)  # bin to hex
@@ -101,7 +94,8 @@ def binary_data(num_ones_array, an_bit_count):
     binSheet = binSheet.rename(columns={'index': 'Sample'})
     binSheet['Sum'] = binSheet['Ones'].cumsum()
     binSheet['Average'] = binSheet['Sum'] / (binSheet['Sample'])
-    binSheet['Zscore'] = (binSheet['Average'] - (an_bit_count/2)) / (((an_bit_count/4) ** 0.5) / (binSheet['Sample'] ** 0.5))
+    binSheet['Zscore'] = (binSheet['Average'] - (an_bit_count / 2)) / (
+                ((an_bit_count / 4) ** 0.5) / (binSheet['Sample'] ** 0.5))
     return binSheet
 
 
@@ -127,13 +121,5 @@ def ztest_pandas(data_file, an_bit_count):
     ztest = ztest.rename(columns={'index': 'Sample'})
     ztest['Sum'] = ztest['Ones'].cumsum()
     ztest['Average'] = ztest['Sum'] / (ztest['Sample'])
-    ztest['Zscore'] = (ztest['Average'] - (an_bit_count/2)) / (((an_bit_count/4) ** 0.5) / (ztest['Sample'] ** 0.5))
+    ztest['Zscore'] = (ztest['Average'] - (an_bit_count / 2)) / (((an_bit_count / 4) ** 0.5) / (ztest['Sample'] ** 0.5))
     return ztest
-
-
-# data_file = "1-SavedFiles/20190710T1926_conscius_pro_xor.bin"
-#
-# start = time.time()
-# file_to_excel(data_file, "1024", "1")
-# end = time.time()
-# print(end - start)

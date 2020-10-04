@@ -14,7 +14,7 @@ import serial
 from serial.tools import list_ports
 
 # Internal imports
-import rng_module as rm
+import teste_module as rm
 
 global thread_live
 thread_live = False
@@ -47,22 +47,22 @@ Do not close this window!""")
 
     column_2 = [[sg.T("RAW(0)/XOR (1,2...)"),
                  sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
-                               readonly=True)], [sg.T("Sample Size (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
-                [sg.T("Sample Interval (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]
-                ]
+                               readonly=True)],
+                [sg.T("Sample Size (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
+                [sg.T("Sample Interval (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]]
 
     column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))], [sg.T("")],
                 [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
 
     acquiring_data = [[sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")]]
 
-    data_analysis = [[sg.T("Bit Count (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)),
-        sg.T("Time Count (s):"), sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")],
-        [sg.Text('Select file:'), sg.Input(),
-                      sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
-                                    initial_folder="./1-SavedFiles")],
-                     [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
-
+    data_analysis = [
+        [sg.T("Sample Size (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T("Sample Size (bits):"),
+         sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")], [sg.Text('Select file:'), sg.Input(),
+                                                                       sg.FileBrowse(key='open_file', file_types=(
+                                                                       ('CSV and Binary', '.csv .bin'),),
+                                                                                     initial_folder="./1-SavedFiles")],
+        [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
 
     tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
                    [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
@@ -91,8 +91,9 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung", layout, size=(1024, 720), location=(50, 50), finalize=True,
-                       element_justification="center", font="Calibri 18", resizable=True, icon=("src/BitB.ico"))
+    window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+                       location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
+                       resizable=True, icon=("src/BitB.ico"))
 
     # Setting things up!
     canvas_elem = window['-CANVAS-']
@@ -121,8 +122,7 @@ Do not close this window!""")
         elif event == "out_folder":
             rm.open_folder()
         elif event == "Generate":
-            #print(type(values["an_bit_count"]), values["an_time_count"])
-            rm.file_to_excel(values["open_file"])
+            rm.file_to_excel(values["open_file"], values["an_bit_count"], values["an_time_count"])
         elif event == 'live_plot':
             global thread_live
             if not thread_live:
@@ -157,15 +157,15 @@ def ac_data(values, window):
 
 def bit_cap(values, window):  # criar função para quando o botão for clicado
     xor_value = values["ac_combo"]
+    sample_value = int(values["ac_bit_count"])
+    interval_value = int(values["ac_time_count"])
     global thread_cap
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    file_name = time.strftime("%Y%m%d-%H%M%S_bitb_f{}".format(xor_value))
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b 256',
+            proc = subprocess.run(f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
                                   stdout=subprocess.PIPE)
             chunk = proc.stdout
             bin_file.write(chunk)
@@ -182,11 +182,11 @@ def bit_cap(values, window):  # criar função para quando o botão for clicado
             break
         num_ones_array = bin_ascii.count('1')  # count numbers of ones in the 2048 string
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
         # print(1 - (end_cap - start_cap))
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
 
