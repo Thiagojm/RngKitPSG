@@ -1,7 +1,5 @@
 # Default imports
 import re
-from datetime import datetime
-import time
 import os
 
 # External imports
@@ -51,7 +49,7 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
         ztest.to_excel(writer, sheet_name='Z-Test', index=False)
         workbook = writer.book
         worksheet = writer.sheets['Z-Test']
-        chart = create_chart(workbook, data_file2, an_time_count)
+        chart = create_chart(workbook, data_file2, an_bit_count, an_time_count)
         chart.add_series({'values': ['Z-Test', 1, 5, number_rows, 5], 'categories': ['Z-Test', 1, 1, number_rows, 1]})
         worksheet.insert_chart('G2', chart)
         writer.save()
@@ -74,7 +72,7 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
         binSheet.to_excel(writer, sheet_name='Z-Test', index=False)
         workbook = writer.book
         worksheet = writer.sheets['Z-Test']
-        chart = create_chart(workbook, data_file2, an_time_count)
+        chart = create_chart(workbook, data_file2, an_bit_count, an_time_count)
         chart.add_series({'values': ['Z-Test', 1, 4, number_rows, 4], 'categories': ['Z-Test', 1, 0, number_rows, 0]})
         worksheet.insert_chart('G2', chart)
         writer.save()
@@ -99,20 +97,6 @@ def binary_data(num_ones_array, an_bit_count):
     return binSheet
 
 
-def create_chart(workbook, data_file2, an_time_count):
-    chart = workbook.add_chart({'type': 'line'})
-    chart.set_title({'name': 'Z-Score: ' + data_file2, 'name_font': {'name': 'Calibri', 'color': 'black', }, })
-
-    chart.set_x_axis({'name': f'One sample every {an_time_count} seconds', 'name_font': {'name': 'Calibri', 'color': 'black'},
-                      'num_font': {'name': 'Calibri', 'color': 'black', }, })
-
-    chart.set_y_axis(
-        {'name': 'Z-Score', 'name_font': {'name': 'Calibri', 'color': 'black'}, 'num_font': {'color': 'black', }, })
-
-    chart.set_legend({'position': 'none'})
-    return chart
-
-
 def ztest_pandas(data_file, an_bit_count):
     ztest = pd.read_csv(data_file, sep=' ', names=["Time", "Ones"])
     ztest.dropna(inplace=True)
@@ -123,3 +107,19 @@ def ztest_pandas(data_file, an_bit_count):
     ztest['Average'] = ztest['Sum'] / (ztest['Sample'])
     ztest['Zscore'] = (ztest['Average'] - (an_bit_count / 2)) / (((an_bit_count / 4) ** 0.5) / (ztest['Sample'] ** 0.5))
     return ztest
+
+
+def create_chart(workbook, data_file2, an_bit_count, an_time_count):
+    chart = workbook.add_chart({'type': 'line'})
+    chart.set_title({'name': 'Z-Score: ' + data_file2, 'name_font': {'name': 'Calibri', 'color': 'black', }, })
+
+    chart.set_x_axis(
+        {'name': f'One sample every {an_time_count} second(s)', 'name_font': {'name': 'Calibri', 'color': 'black'},
+         'num_font': {'name': 'Calibri', 'color': 'black', }, })
+
+    chart.set_y_axis(
+        {'name': f'Z-Score - Sample Size = {an_bit_count} bits ', 'name_font': {'name': 'Calibri', 'color': 'black'},
+         'num_font': {'color': 'black', }, })
+
+    chart.set_legend({'position': 'none'})
+    return chart

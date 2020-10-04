@@ -13,7 +13,7 @@ import serial
 from serial.tools import list_ports
 
 # Internal imports
-import rng_module as rm
+import teste_module as rm
 
 global thread_live
 thread_live = False
@@ -39,29 +39,47 @@ Do not close this window!""")
     sg.theme('DarkBlue')
 
     # TAB 1 - Capture / Analyse
-    acquiring_data = [[sg.T("Choose RNG", size=(16, 1)), sg.T("RAW(0)/XOR(1,2...)", size=(20, 1))],
-                      [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True, size=(19, 1)),
-                       sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
-                                     readonly=True), sg.T("", size=(4, 1)), sg.B("Start", k='ac_button', size=(20, 1))],
-                      [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac", size=(36, 1)),
-                       sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")],
-                      [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac", size=(20, 1))]]
 
-    data_analysis = [[sg.Text('Select file:'), sg.Input(),
-                      sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
-                                    initial_folder="./1-SavedFiles")],
-                     [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
+    column_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
+                [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
+                [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")]]
+
+    column_2 = [[sg.T("RAW(0)/XOR (1,2...)"),
+                 sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
+                               readonly=True)],
+                [sg.T("Sample Size (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
+                [sg.T("Sample Interval (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]]
+
+    column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))], [sg.T("")],
+                [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
+
+    acquiring_data = [[sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")]]
+
+    data_analysis = [
+        [sg.T("Sample Size (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T("Sample Interval (s):"),
+         sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")], [sg.Text('Select file:'), sg.Input(),
+                                                                       sg.FileBrowse(key='open_file', file_types=(
+                                                                           ('CSV and Binary', '.csv .bin'),),
+                                                                                     initial_folder="./1-SavedFiles")],
+        [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
 
     tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-        [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
+                   [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
-    graph_options = [[sg.T("Choose RNG", size=(20, 1)), sg.T("RAW/XOR", size=(20, 1))],
-                     [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True, size=(19, 1)),
-                      sg.InputCombo((0, 1), default_value=0, size=(4, 1), k="live_combo", enable_events=False,
-                                    readonly=True), sg.T("", size=(2, 1)), sg.B("Start", k='live_plot', size=(20, 1))],
-                     [sg.Radio('TrueRNG3', "radio_graph", k="true3_live", size=(20, 1)),
-                      sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
+    column_graph_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True, size=(19, 1))],
+                [sg.Radio('TrueRNG3', "radio_graph", k="true3_live", size=(20, 1))]]
+
+    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2)"),
+                 sg.InputCombo((0, 1), default_value=0, size=(4, 1), k="live_combo", enable_events=False,
+                                    readonly=True)],
+                [sg.T("Sample Size (bits):"), sg.Input("2048", k="live_bit_count", size=(6, 1))],
+                [sg.T("Sample Interval (s):"), sg.Input("1", k="live_time_count", size=(6, 1))]]
+
+    column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))], [sg.T("")],
+                [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
+
+    graph_options = [[sg.Column(column_graph_1), sg.Column(column_graph_2), sg.Column(column_graph_3, element_justification="center")]]
 
     live_graph = [[sg.Canvas(key='-CANVAS-')]]
 
@@ -79,8 +97,9 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung", layout, size=(1024, 720), location=(50, 50), finalize=True,
-                       element_justification="center", font="Calibri 18", resizable=True, icon=("src/BitB.ico"))
+    window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+                       location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
+                       resizable=True, icon=("src/BitB.ico"))
 
     # Setting things up!
     canvas_elem = window['-CANVAS-']
@@ -109,7 +128,7 @@ Do not close this window!""")
         elif event == "out_folder":
             rm.open_folder()
         elif event == "Generate":
-            rm.file_to_excel(values["open_file"])
+            rm.file_to_excel(values["open_file"], values["an_bit_count"], values["an_time_count"])
         elif event == 'live_plot':
             global thread_live
             if not thread_live:
@@ -125,8 +144,8 @@ Do not close this window!""")
         # Live Plot on Loop
         ax.plot(index_number_array, zscore_array, color='orange')
         ax.set_title("Live Plot")
-        ax.set_xlabel('Time(s)', fontsize=10)
-        ax.set_ylabel('Z-Score', fontsize='medium')
+        ax.set_xlabel(f'One sample every {values["live_time_count"]} second(s)', fontsize=10)
+        ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
         fig_agg.draw()
     window.close()
 
@@ -136,24 +155,25 @@ def ac_data(values, window):
     if values["bit_ac"]:
         bit_cap(values, window)
     elif values['true3_ac']:
-        trng3_cap(window)
+        trng3_cap(values, window)
     elif values["true3_bit_ac"]:
         threading.Thread(target=bit_cap, args=(values, window), daemon=True).start()
-        trng3_cap(window)
+        trng3_cap(values, window)
 
 
-def bit_cap(values, window):  # criar função para quando o botão for clicado
+def bit_cap(values, window):
     xor_value = values["ac_combo"]
+    sample_value = int(values["ac_bit_count"])
+    interval_value = int(values["ac_time_count"])
     global thread_cap
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    file_name = time.strftime("%Y%m%d-%H%M%S_bitb_f{}".format(xor_value))
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b 256',
-                                  stdout=subprocess.PIPE)
+            proc = subprocess.run(
+                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
+                stdout=subprocess.PIPE)
             chunk = proc.stdout
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
@@ -167,28 +187,29 @@ def bit_cap(values, window):  # criar função para quando o botão for clicado
             window['ac_button'].update("Start")
             window["stat_ac"].update("        Idle", text_color="orange")
             break
-        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the 2048 string
+        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        # print(1 - (end_cap - start_cap))
+        # print(interval_value - (end_cap - start_cap))
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
 
 
-def trng3_cap(window):
+def trng3_cap(values, window):
     global thread_cap
-    blocksize = 256
-    ports = dict()
+    sample_value = int(values["ac_bit_count"])
+    interval_value = int(values["ac_time_count"])
+    blocksize = int(sample_value / 8)
     ports_avaiable = list(list_ports.comports())
     rng_com_port = None
     for temp in ports_avaiable:
         if temp[1].startswith("TrueRNG"):
             if rng_com_port == None:  # always chooses the 1st TrueRNG found
                 rng_com_port = str(temp[0])
-    file_name = time.strftime("%Y%m%d-%H%M%S_trng")
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_trng_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
@@ -213,20 +234,17 @@ def trng3_cap(window):
                 window['ac_button'].update("Start")
                 window["stat_ac"].update("        Idle", text_color="orange")
                 break
-            if bin_file != 0:
-                bin_file.write(x)
+            bin_file.write(x)
             ser.close()
-            if bin_file != 0:
-                bin_file.close()
         bin_hex = BitArray(x)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
-        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the 2048 string
+        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        # print(1 - (end_cap - start_cap))
+        # print(interval_value - (end_cap - start_cap))
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
 
@@ -237,7 +255,7 @@ def live_plot(values, window):
     if values['bit_live']:
         livebblaWin(values, window)
     elif values['true3_live']:
-        trng3live(window)
+        trng3live(values, window)
 
 
 def livebblaWin(values, window):  # Function to take live data from bitbabbler
@@ -245,10 +263,10 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     global zscore_array
     global index_number_array
     thread_live = True
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    live_combo_value = values['live_combo']
-    file_name = time.strftime("%Y%m%d-%H%M%S_bitb_f{}".format(live_combo_value))
+    xor_value = values['live_combo']
+    sample_value = int(values["live_bit_count"])
+    interval_value = int(values["live_time_count"])
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
     csv_ones = []
@@ -258,8 +276,9 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{live_combo_value} -b 256',
-                                  stdout=subprocess.PIPE)
+            proc = subprocess.run(
+                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
+                stdout=subprocess.PIPE)
             chunk = proc.stdout
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
@@ -273,35 +292,37 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
             window['live_plot'].update("Start")
             window["stat_live"].update("        Idle", text_color="orange")
             break
-        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the 2048 string
+        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         csv_ones.append(num_ones_array)
         sums_csv = sum(csv_ones)
         avrg_csv = sums_csv / index_number
-        zscore_csv = (avrg_csv - 1024) / (22.62741699796 / (index_number ** 0.5))
+        zscore_csv = (avrg_csv - (sample_value / 2)) / (((sample_value / 4) ** 0.5) / (index_number ** 0.5))
         zscore_array.append(zscore_csv)
         index_number_array.append(index_number)
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        # print(1 - (end_cap - start_cap))
+        #print(interval_value - (end_cap - start_cap))
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
 
 
-def trng3live(window):
+def trng3live(values, window):
     global thread_live
     global zscore_array
     global index_number_array
     thread_live = True
-    file_name = time.strftime("%Y%m%d-%H%M%S_trng")
+    sample_value = int(values["live_bit_count"])
+    interval_value = int(values["live_time_count"])
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_trng_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
     csv_ones = []
     zscore_array = []
     index_number_array = []
-    blocksize = 256
+    blocksize = int(sample_value / 8)
     ports_avaiable = list(list_ports.comports())
     rng_com_port = None
     # Loop on all available ports to find TrueRNG
@@ -346,8 +367,7 @@ def trng3live(window):
                 window['live_plot'].update("Start")
                 window["stat_live"].update("        Idle", text_color="orange")
                 return
-            if bin_file != 0:
-                bin_file.write(chunk)
+            bin_file.write(chunk)
             # Close the serial port
             ser.close()
         bin_hex = BitArray(chunk)  # bin to hex
@@ -356,15 +376,15 @@ def trng3live(window):
         csv_ones.append(num_ones_array)
         sums_csv = sum(csv_ones)
         avrg_csv = sums_csv / index_number
-        zscore_csv = (avrg_csv - 1024) / (22.62741699796 / (index_number ** 0.5))
+        zscore_csv = (avrg_csv - (sample_value / 2)) / (((sample_value / 4) ** 0.5) / (index_number ** 0.5))
         zscore_array.append(zscore_csv)
         index_number_array.append(index_number)
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        # print(1 - (end_cap - start_cap) / 1000)
+        # print(interval_value - (end_cap - start_cap) / 1000)
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
 
