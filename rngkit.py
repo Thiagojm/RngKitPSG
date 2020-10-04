@@ -5,7 +5,6 @@ import subprocess
 from time import localtime, strftime
 
 # External imports
-import pandas as pd
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 from matplotlib import style
