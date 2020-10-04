@@ -47,19 +47,22 @@ Do not close this window!""")
 
     column_2 = [[sg.T("RAW(0)/XOR (1,2...)"),
                  sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
-                               readonly=True)], [sg.T("Bit Count (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
-                [sg.T("Time Count (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]
+                               readonly=True)], [sg.T("Sample Size (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
+                [sg.T("Sample Interval (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]
                 ]
 
     column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))], [sg.T("")],
                 [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
 
-    data_analysis = [[sg.Text('Select file:'), sg.Input(),
+    acquiring_data = [[sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")]]
+
+    data_analysis = [[sg.T("Bit Count (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)),
+        sg.T("Time Count (s):"), sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")],
+        [sg.Text('Select file:'), sg.Input(),
                       sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
                                     initial_folder="./1-SavedFiles")],
                      [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
 
-    acquiring_data = [[sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")]]
 
     tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
                    [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
@@ -118,6 +121,7 @@ Do not close this window!""")
         elif event == "out_folder":
             rm.open_folder()
         elif event == "Generate":
+            #print(type(values["an_bit_count"]), values["an_time_count"])
             rm.file_to_excel(values["open_file"])
         elif event == 'live_plot':
             global thread_live
