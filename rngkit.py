@@ -13,7 +13,7 @@ import serial
 from serial.tools import list_ports
 
 # Internal imports
-import teste_module as rm
+import rng_module as rm
 
 global thread_live
 thread_live = False
@@ -144,7 +144,7 @@ Do not close this window!""")
         # Live Plot on Loop
         ax.plot(index_number_array, zscore_array, color='orange')
         ax.set_title("Live Plot")
-        ax.set_xlabel(f'One sample every {values["live_time_count"]} second(s)', fontsize=10)
+        ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
         ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
         fig_agg.draw()
     window.close()

@@ -114,7 +114,7 @@ def create_chart(workbook, data_file2, an_bit_count, an_time_count):
     chart.set_title({'name': 'Z-Score: ' + data_file2, 'name_font': {'name': 'Calibri', 'color': 'black', }, })
 
     chart.set_x_axis(
-        {'name': f'One sample every {an_time_count} second(s)', 'name_font': {'name': 'Calibri', 'color': 'black'},
+        {'name': f'Number of samples (one sample every {an_time_count} second(s))', 'name_font': {'name': 'Calibri', 'color': 'black'},
          'num_font': {'name': 'Calibri', 'color': 'black', }, })
 
     chart.set_y_axis(
