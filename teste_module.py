@@ -95,7 +95,7 @@ def binary_data(num_ones_array, an_bit_count):
     binSheet['Sum'] = binSheet['Ones'].cumsum()
     binSheet['Average'] = binSheet['Sum'] / (binSheet['Sample'])
     binSheet['Zscore'] = (binSheet['Average'] - (an_bit_count / 2)) / (
-                ((an_bit_count / 4) ** 0.5) / (binSheet['Sample'] ** 0.5))
+            ((an_bit_count / 4) ** 0.5) / (binSheet['Sample'] ** 0.5))
     return binSheet
 
 

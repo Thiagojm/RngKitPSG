@@ -60,7 +60,7 @@ Do not close this window!""")
         [sg.T("Sample Size (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T("Sample Size (bits):"),
          sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")], [sg.Text('Select file:'), sg.Input(),
                                                                        sg.FileBrowse(key='open_file', file_types=(
-                                                                       ('CSV and Binary', '.csv .bin'),),
+                                                                           ('CSV and Binary', '.csv .bin'),),
                                                                                      initial_folder="./1-SavedFiles")],
         [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
 
@@ -149,10 +149,10 @@ def ac_data(values, window):
     if values["bit_ac"]:
         bit_cap(values, window)
     elif values['true3_ac']:
-        trng3_cap(window)
+        trng3_cap(values, window)
     elif values["true3_bit_ac"]:
         threading.Thread(target=bit_cap, args=(values, window), daemon=True).start()
-        trng3_cap(window)
+        trng3_cap(values, window)
 
 
 def bit_cap(values, window):  # criar função para quando o botão for clicado
@@ -165,8 +165,9 @@ def bit_cap(values, window):  # criar função para quando o botão for clicado
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
-                                  stdout=subprocess.PIPE)
+            proc = subprocess.run(
+                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
+                stdout=subprocess.PIPE)
             chunk = proc.stdout
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
@@ -191,17 +192,19 @@ def bit_cap(values, window):  # criar função para quando o botão for clicado
             pass
 
 
-def trng3_cap(window):
+def trng3_cap(values, window):
     global thread_cap
-    blocksize = 256
-    ports = dict()
+    sample_value = int(values["ac_bit_count"])
+    interval_value = int(values["ac_time_count"])
+    blocksize = int(sample_value / 8)
+    #ports = dict()
     ports_avaiable = list(list_ports.comports())
     rng_com_port = None
     for temp in ports_avaiable:
         if temp[1].startswith("TrueRNG"):
             if rng_com_port == None:  # always chooses the 1st TrueRNG found
                 rng_com_port = str(temp[0])
-    file_name = time.strftime("%Y%m%d-%H%M%S_trng")
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_trng_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
@@ -226,20 +229,20 @@ def trng3_cap(window):
                 window['ac_button'].update("Start")
                 window["stat_ac"].update("        Idle", text_color="orange")
                 break
-            if bin_file != 0:
-                bin_file.write(x)
+            # if bin_file != 0:
+            bin_file.write(x)
             ser.close()
-            if bin_file != 0:
-                bin_file.close()
+            # if bin_file != 0:
+            #     bin_file.close()
         bin_hex = BitArray(x)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
-        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the 2048 string
+        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
         # print(1 - (end_cap - start_cap))
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
 
@@ -250,7 +253,7 @@ def live_plot(values, window):
     if values['bit_live']:
         livebblaWin(values, window)
     elif values['true3_live']:
-        trng3live(window)
+        trng3live(values, window)
 
 
 def livebblaWin(values, window):  # Function to take live data from bitbabbler
@@ -258,10 +261,10 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     global zscore_array
     global index_number_array
     thread_live = True
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    live_combo_value = values['live_combo']
-    file_name = time.strftime("%Y%m%d-%H%M%S_bitb_f{}".format(live_combo_value))
+    xor_value = values['live_combo']
+    sample_value = int(values["ac_bit_count"])
+    interval_value = int(values["ac_time_count"])
+    file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
     csv_ones = []
@@ -271,8 +274,9 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{live_combo_value} -b 256',
-                                  stdout=subprocess.PIPE)
+            proc = subprocess.run(
+                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
+                stdout=subprocess.PIPE)
             chunk = proc.stdout
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
@@ -286,24 +290,25 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
             window['live_plot'].update("Start")
             window["stat_live"].update("        Idle", text_color="orange")
             break
-        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the 2048 string
+        num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         csv_ones.append(num_ones_array)
         sums_csv = sum(csv_ones)
         avrg_csv = sums_csv / index_number
-        zscore_csv = (avrg_csv - 1024) / (22.62741699796 / (index_number ** 0.5))
+        zscore_csv = (avrg_csv - (sample_value / 2)) / (((sample_value / 4) ** 0.5) / (index_number ** 0.5))
         zscore_array.append(zscore_csv)
         index_number_array.append(index_number)
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
-            write_file.write('{} {}\n'.format(strftime("%H:%M:%S", localtime()), num_ones_array))
+            write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        # print(1 - (end_cap - start_cap))
+        print(float(interval_value - (end_cap - start_cap)))
+        print(interval_value)
         try:
-            time.sleep(1 - (end_cap - start_cap))
+            time.sleep(float(interval_value - (end_cap - start_cap)))
         except Exception:
             pass
 
 
-def trng3live(window):
+def trng3live(values, window):
     global thread_live
     global zscore_array
     global index_number_array
