@@ -12,7 +12,7 @@ from bitstring import BitArray
 
 def popupmsg(msg_title, msg):
     sg.popup_non_blocking(msg_title, msg, keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
-                          icon="src/BitB.ico")
+                          icon="src/images/BitB.ico")
 
 
 def draw_figure(canvas, figure):

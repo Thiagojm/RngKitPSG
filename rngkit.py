@@ -32,12 +32,12 @@ def main():
 Wait for the application to load!
 Do not close this window!""")
 
-    with open("src/instructions.txt", "r", encoding="utf8") as f:
+    with open("src/others/instructions.txt", "r", encoding="utf8") as f:
         instruction_text = f.read()
 
     # THEME
     # Good Ones: DarkBlue14, Dark, DarkBlue, DarkBlue3, DarkTeal1, DarkTeal10, DarkTeal9, LightGreen
-    sg.theme('DarkTeal1')
+    sg.theme('LightGreen')
 
     # TAB 1 - Capture / Analyse
 
@@ -68,19 +68,21 @@ Do not close this window!""")
                    [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
-    column_graph_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True, size=(19, 1))],
-                [sg.Radio('TrueRNG3', "radio_graph", k="true3_live", size=(20, 1))]]
+    column_graph_1 = [[sg.T("Choose RNG")],
+                      [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True, size=(19, 1))],
+                      [sg.Radio('TrueRNG3', "radio_graph", k="true3_live", size=(20, 1))]]
 
     column_graph_2 = [[sg.T("RAW(0)/XOR (1,2)"),
-                 sg.InputCombo((0, 1), default_value=0, size=(4, 1), k="live_combo", enable_events=False,
-                                    readonly=True)],
-                [sg.T("Sample Size (bits):"), sg.Input("2048", k="live_bit_count", size=(6, 1))],
-                [sg.T("Sample Interval (s):"), sg.Input("1", k="live_time_count", size=(6, 1))]]
+                       sg.InputCombo((0, 1), default_value=0, size=(4, 1), k="live_combo", enable_events=False,
+                                     readonly=True)],
+                      [sg.T("Sample Size (bits):"), sg.Input("2048", k="live_bit_count", size=(6, 1))],
+                      [sg.T("Sample Interval (s):"), sg.Input("1", k="live_time_count", size=(6, 1))]]
 
     column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))], [sg.T("")],
-                [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
+                      [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
 
-    graph_options = [[sg.Column(column_graph_1), sg.Column(column_graph_2), sg.Column(column_graph_3, element_justification="center")]]
+    graph_options = [[sg.Column(column_graph_1), sg.Column(column_graph_2),
+                      sg.Column(column_graph_3, element_justification="center")]]
 
     live_graph = [[sg.Canvas(key='-CANVAS-')]]
 
@@ -100,7 +102,7 @@ Do not close this window!""")
     # WINDOW
     window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
-                       resizable=True, icon=("src/BitB.ico"))
+                       resizable=True, icon=("src/images/BitB.ico"))
 
     # Setting things up!
     canvas_elem = window['-CANVAS-']
@@ -176,15 +178,16 @@ def bit_cap(values, window):
     sample_value = int(values["ac_bit_count"])
     interval_value = int(values["ac_time_count"])
     global thread_cap
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(
-                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
-                stdout=subprocess.PIPE)
-            chunk = proc.stdout
+            proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
+                stdout=subprocess.PIPE, startupinfo=startupinfo)
+            chunk = proc.stdout.read()
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
@@ -276,6 +279,8 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     xor_value = values['live_combo']
     sample_value = int(values["live_bit_count"])
     interval_value = int(values["live_time_count"])
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
@@ -286,10 +291,10 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(
-                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
-                stdout=subprocess.PIPE)
-            chunk = proc.stdout
+            proc = subprocess.Popen(
+                f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
+                stdout=subprocess.PIPE, startupinfo=startupinfo)
+            chunk = proc.stdout.read()
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
@@ -312,7 +317,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
             write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        #print(interval_value - (end_cap - start_cap))
+        # print(interval_value - (end_cap - start_cap))
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
