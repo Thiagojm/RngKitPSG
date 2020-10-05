@@ -41,31 +41,36 @@ Do not close this window!""")
 
     # TAB 1 - Capture / Analyse
 
-    column_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
+    column_1 = [[sg.T("Choose RNG", size=(25, 1))], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
                 [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
                 [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")]]
 
-    column_2 = [[sg.T("RAW(0)/XOR (1,2...)"),
-                 sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
-                               readonly=True)],
-                [sg.T("Sample Size (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
-                [sg.T("Sample Interval (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]]
+    column_2 = [[sg.T("RAW(0)/XOR (1,2...):", size=(18, 1)),
+                 sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(5, 1), k="ac_combo", enable_events=False,
+                               readonly=True), sg.T(" ", size=(3, 1))],
+                [sg.T("Sample Size (bits):", size=(18, 1)), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
+                [sg.T("Sample Interval (s):", size=(18, 1)), sg.Input("1", k="ac_time_count", size=(6, 1))],
+                [sg.T(" ")]]
 
     column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))], [sg.T("")],
                 [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
 
-    acquiring_data = [[sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")]]
+    acquiring_data = [[sg.T(" ")],
+                      [sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")],
+                      [sg.T(" ")]]
 
-    data_analysis = [
-        [sg.T("Sample Size (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T("Sample Interval (s):"),
-         sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")], [sg.Text('Select file:'), sg.Input(),
-                                                                       sg.FileBrowse(key='open_file', file_types=(
-                                                                           ('CSV and Binary', '.csv .bin'),),
-                                                                                     initial_folder="./1-SavedFiles")],
-        [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
+    data_analysis = [[sg.T(" ")], [sg.T(" ", size=(8, 1)), sg.T("Sample Size (bits):", size=(18, 1)),
+                                   sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T(" ", size=(8, 1)),
+                                   sg.T("Sample Interval (s):", size=(18, 1)),
+                                   sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")],
+                     [sg.Text('Select file:', size=(10, 1)), sg.Input(size=(60, 1)),
+                      sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
+                                    initial_folder="./1-SavedFiles", size=(8, 1)), sg.T(" ", size=(13, 1))],
+                     [sg.T(" ", size=(24, 1)), sg.B("Generate"), sg.T(" ", size=(1, 1)),
+                      sg.B("Open Output Folder", k="out_folder")], [sg.T(" ")], [sg.T(" ")], [sg.T(" ")]]
 
-    tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-                   [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
+    tab1_layout = [[sg.Frame("Acquiring Data", font="Calibri, 20", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
+                   [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
     column_graph_1 = [[sg.T("Choose RNG")],
@@ -185,7 +190,8 @@ def bit_cap(values, window):
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
+            proc = subprocess.Popen(
+                f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
                 stdout=subprocess.PIPE, startupinfo=startupinfo)
             chunk = proc.stdout.read()
             bin_file.write(chunk)
