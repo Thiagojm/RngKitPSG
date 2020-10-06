@@ -69,8 +69,9 @@ Do not close this window!""")
                      [sg.T(" ", size=(24, 1)), sg.B("Generate"), sg.T(" ", size=(1, 1)),
                       sg.B("Open Output Folder", k="out_folder")], [sg.T(" ")], [sg.T(" ")], [sg.T(" ")]]
 
-    tab1_layout = [[sg.Frame("Acquiring Data", font="Calibri, 20", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-                   [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
+    tab1_layout = [
+        [sg.Frame("Acquiring Data", font="Calibri, 20", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
+        [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
     column_graph_1 = [[sg.T("Choose RNG")],
