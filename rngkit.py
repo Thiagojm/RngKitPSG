@@ -39,7 +39,7 @@ Do not close this window!""")
     # Good Ones: DarkBlue14, Dark, DarkBlue, DarkBlue3, DarkTeal1, DarkTeal10, DarkTeal9, LightGreen
     sg.theme('LightGreen')
 
-    # TAB 1 - Capture / Analyse
+    # TAB 1 - Collect / Analyse
 
     column_1 = [[sg.T("Choose RNG", size=(25, 1))], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
                 [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
@@ -47,7 +47,7 @@ Do not close this window!""")
 
     column_2 = [[sg.T("RAW(0)/XOR (1,2...):", size=(18, 1)),
                  sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(5, 1), k="ac_combo", enable_events=False,
-                               readonly=True), sg.T(" ", size=(3, 1))],
+                               readonly=True), sg.T(" ", size=(4, 1))],
                 [sg.T("Sample Size (bits):", size=(18, 1)), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
                 [sg.T("Sample Interval (s):", size=(18, 1)), sg.Input("1", k="ac_time_count", size=(6, 1))],
                 [sg.T(" ")]]
@@ -74,15 +74,15 @@ Do not close this window!""")
         [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
-    column_graph_1 = [[sg.T("Choose RNG")],
-                      [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True, size=(19, 1))],
-                      [sg.Radio('TrueRNG3', "radio_graph", k="true3_live", size=(20, 1))]]
+    column_graph_1 = [[sg.T("Choose RNG", size=(22, 1))],
+                      [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True)],
+                      [sg.Radio('TrueRNG3', "radio_graph", k="true3_live")]]
 
-    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2)"),
-                       sg.InputCombo((0, 1), default_value=0, size=(4, 1), k="live_combo", enable_events=False,
-                                     readonly=True)],
-                      [sg.T("Sample Size (bits):"), sg.Input("2048", k="live_bit_count", size=(6, 1))],
-                      [sg.T("Sample Interval (s):"), sg.Input("1", k="live_time_count", size=(6, 1))]]
+    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2):", size=(16,1)),
+                       sg.InputCombo((0, 1), default_value=0, size=(5, 1), k="live_combo", enable_events=False,
+                                     readonly=True), sg.T(" ", size=(9,1))],
+                      [sg.T("Sample Size (bits):", size=(16,1)), sg.Input("2048", k="live_bit_count", size=(6, 1))],
+                      [sg.T("Sample Interval (s):", size=(16,1)), sg.Input("1", k="live_time_count", size=(6, 1))]]
 
     column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))], [sg.T("")],
                       [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
@@ -92,8 +92,8 @@ Do not close this window!""")
 
     live_graph = [[sg.Canvas(key='-CANVAS-')]]
 
-    tab2_layout = [[sg.Frame("Options", layout=graph_options, k="graph_options", size=(90, 9))],
-                   [sg.Frame("Live Plot", layout=live_graph, k="graph", size=(90, 9))]]
+    tab2_layout = [[sg.Frame("Options", font="Calibri, 20", layout=graph_options, k="graph_options", size=(90, 9))],
+                   [sg.Frame("Live Plot", font="Calibri, 20", layout=live_graph, k="graph", size=(90, 9))]]
 
     # TAB 3 - Instruções
     tab3_layout = [[sg.T("Instructions", relief="raised", justification="center", size=(70, 1), font=("Calibri, 24"))],
@@ -130,7 +130,7 @@ Do not close this window!""")
                     thread_cap = True
                     threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
                     window['ac_button'].update("Stop")
-                    window["stat_ac"].update("  Capturing", text_color="green")
+                    window["stat_ac"].update("  Collecting", text_color="green")
                 else:
                     thread_cap = False
                     window['ac_button'].update("Start")
@@ -152,7 +152,7 @@ Do not close this window!""")
                     ax.clear()
                     threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
                     window['live_plot'].update("Stop")
-                    window["stat_live"].update("  Capturing", text_color="green")
+                    window["stat_live"].update("  Collecting", text_color="green")
                 else:
                     thread_live = False
                     window['live_plot'].update("Start")
