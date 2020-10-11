@@ -13,24 +13,24 @@ for data collection and statistical analysis for several purposes, including min
 
 # Supported Hardware:
 
-1- TrueRNG and TrueRNGPro (https://ubld.it/);
+1- TrueRNG and TrueRNGPro (https://ubld.it/);  
 2- Bitbabbler Black and White (http://www.bitbabbler.org/what.html).
 
 # Installation
 
 1- Hardware Installation:
-    The default installation path is: "C:\Users\Username\RngKit" - Where Username is the name of the windows current user.
-    1.1- TrueRNG e TrueRNGPro:
+    The default installation path is: "C:\Users\Username\RngKit" - Where Username is the name of the windows current user.  
+    1.1- TrueRNG e TrueRNGPro:  
          Choose from the 2-Installation folder (inside the "C:\Users\Username\RngKit") the TrueRng folder, the folder for your device (TrueRng3 or TrueRngPro)
-         Within this folder, right-click the TrueRNG.inf or TrueRNGpro.inf file and select Install. Follow the instructions for installation.
-    1.2- Bitbabbler:
+         Within this folder, right-click the TrueRNG.inf or TrueRNGpro.inf file and select Install. Follow the instructions for installation.  
+    1.2- Bitbabbler:  
          Inside the 2-Installation\BitBabbler folder (inside the "C:\Users\Username\RngKit"), run vcredist_x64.exe (source: http://www.microsoft.com/en-us/download/details.aspx?id=30679) and follow the installation guidelines.
          Insert your bitbabbler device into a USB port and run the zadig-2.4.exe file (source: http://zadig.akeo.ie/). Select your device and click "Install WCDI Driver".
          Wait for the process to finish and close the program.
 
 # Usage
 
-1- Start the program;
+1- Start the program;  
 2- The program has 3 tabs:
 - TAB 1: The first tab is for analysis and collecting data:
 > Collecting:
