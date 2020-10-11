@@ -1,7 +1,7 @@
 # RngKit 2.0
-by Thiago Jung
-https://github.com/Thiagojm/RngKitPSG
-thiagojm1984@hotmail.com
+by Thiago Jung  
+https://github.com/Thiagojm/RngKitPSG  
+thiagojm1984@hotmail.com  
 Written in Python 3.7.9
 -----------------------
 
