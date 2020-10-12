@@ -4,25 +4,29 @@ import threading
 import subprocess
 from time import localtime, strftime
 
+
 # External imports
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 from matplotlib import style
+from matplotlib.animation import FuncAnimation
 from bitstring import BitArray
 import serial
 from serial.tools import list_ports
+import numpy as np
 
 # Internal imports
-from tests import teste_module as rm
+import test_module as rm
 
+# Setting Globals
 global thread_live
 thread_live = False
 global thread_cap
 thread_cap = False
 global index_number_array
-index_number_array = []
+index_number_array = np.array([])
 global zscore_array
-zscore_array = []
+zscore_array = np.array([])
 
 
 def main():
@@ -31,64 +35,72 @@ def main():
 Wait for the application to load!
 Do not close this window!""")
 
-    with open("../src/others/instructions.txt", "r", encoding="utf8") as f:
-        texto = f.read()
+    with open("src/others/instructions.txt", "r", encoding="utf8") as f:
+        instruction_text = f.read()
 
     # THEME
     # Good Ones: DarkBlue14, Dark, DarkBlue, DarkBlue3, DarkTeal1, DarkTeal10, DarkTeal9, LightGreen
-    sg.theme('DarkBlue')
+    sg.theme('LightGreen')
 
-    # TAB 1 - Capture / Analyse
+    # TAB 1 - Collect / Analyse
 
-    column_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
+    column_1 = [[sg.T("Choose RNG", size=(25, 1))], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
                 [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
                 [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")]]
 
-    column_2 = [[sg.T("RAW(0)/XOR (1,2...)"),
-                 sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(4, 1), k="ac_combo", enable_events=False,
-                               readonly=True)],
-                [sg.T("Sample Size (bits):"), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
-                [sg.T("Sample Interval (s):"), sg.Input("1", k="ac_time_count", size=(6, 1))], [sg.T(" ")]]
+    column_2 = [[sg.T("RAW(0)/XOR (1,2...):", size=(18, 1)),
+                 sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(5, 1), k="ac_combo", enable_events=False,
+                               readonly=True), sg.T(" ", size=(4, 1))],
+                [sg.T("Sample Size (bits):", size=(18, 1)), sg.Input("2048", k="ac_bit_count", size=(6, 1))],
+                [sg.T("Sample Interval (s):", size=(18, 1)), sg.Input("1", k="ac_time_count", size=(6, 1))],
+                [sg.T(" ")]]
 
     column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))], [sg.T("")],
                 [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
 
-    acquiring_data = [[sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")]]
+    acquiring_data = [[sg.T(" ")],
+                      [sg.Column(column_1), sg.Column(column_2), sg.Column(column_3, element_justification="center")],
+                      [sg.T(" ")]]
 
-    data_analysis = [
-        [sg.T("Sample Size (bits):"), sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T("Sample Interval (s):"),
-         sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")], [sg.Text('Select file:'), sg.Input(),
-                                                                       sg.FileBrowse(key='open_file', file_types=(
-                                                                           ('CSV and Binary', '.csv .bin'),),
-                                                                                     initial_folder="./1-SavedFiles")],
-        [sg.B("Generate"), sg.B("Open Output Folder", k="out_folder")]]
+    data_analysis = [[sg.T(" ")], [sg.T(" ", size=(8, 1)), sg.T("Sample Size (bits):", size=(18, 1)),
+                                   sg.Input("2048", k="an_bit_count", size=(6, 1)), sg.T(" ", size=(8, 1)),
+                                   sg.T("Sample Interval (s):", size=(18, 1)),
+                                   sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")],
+                     [sg.Text('Select file:', size=(10, 1)), sg.Input(size=(60, 1)),
+                      sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
+                                    initial_folder="./1-SavedFiles", size=(8, 1)), sg.T(" ", size=(13, 1))],
+                     [sg.T(" ", size=(24, 1)), sg.B("Generate"), sg.T(" ", size=(1, 1)),
+                      sg.B("Open Output Folder", k="out_folder")], [sg.T(" ")], [sg.T(" ")], [sg.T(" ")]]
 
-    tab1_layout = [[sg.Frame("Acquiring Data", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-                   [sg.Frame("Data Analysis", layout=data_analysis, k="data_analysis", size=(90, 9))]]
+    tab1_layout = [
+        [sg.Frame("Acquiring Data", font="Calibri, 20", layout=acquiring_data, k="acquiring_data", size=(90, 9))],
+        [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
-    column_graph_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True, size=(19, 1))],
-                [sg.Radio('TrueRNG3', "radio_graph", k="true3_live", size=(20, 1))]]
+    column_graph_1 = [[sg.T("Choose RNG", size=(22, 1))],
+                      [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True)],
+                      [sg.Radio('TrueRNG3', "radio_graph", k="true3_live")]]
 
-    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2)"),
-                 sg.InputCombo((0, 1), default_value=0, size=(4, 1), k="live_combo", enable_events=False,
-                                    readonly=True)],
-                [sg.T("Sample Size (bits):"), sg.Input("2048", k="live_bit_count", size=(6, 1))],
-                [sg.T("Sample Interval (s):"), sg.Input("1", k="live_time_count", size=(6, 1))]]
+    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2):", size=(16,1)),
+                       sg.InputCombo((0, 1), default_value=0, size=(5, 1), k="live_combo", enable_events=False,
+                                     readonly=True), sg.T(" ", size=(9,1))],
+                      [sg.T("Sample Size (bits):", size=(16,1)), sg.Input("2048", k="live_bit_count", size=(6, 1))],
+                      [sg.T("Sample Interval (s):", size=(16,1)), sg.Input("1", k="live_time_count", size=(6, 1))]]
 
     column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))], [sg.T("")],
-                [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
+                      [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
 
-    graph_options = [[sg.Column(column_graph_1), sg.Column(column_graph_2), sg.Column(column_graph_3, element_justification="center")]]
+    graph_options = [[sg.Column(column_graph_1), sg.Column(column_graph_2),
+                      sg.Column(column_graph_3, element_justification="center")]]
 
     live_graph = [[sg.Canvas(key='-CANVAS-')]]
 
-    tab2_layout = [[sg.Frame("Options", layout=graph_options, k="graph_options", size=(90, 9))],
-                   [sg.Frame("Live Plot", layout=live_graph, k="graph", size=(90, 9))]]
+    tab2_layout = [[sg.Frame("Options", font="Calibri, 20", layout=graph_options, k="graph_options", size=(90, 9))],
+                   [sg.Frame("Live Plot", font="Calibri, 20", layout=live_graph, k="graph", size=(90, 9))]]
 
     # TAB 3 - Instruções
     tab3_layout = [[sg.T("Instructions", relief="raised", justification="center", size=(70, 1), font=("Calibri, 24"))],
-                   [sg.Multiline(default_text=texto, size=(75, 19), disabled=True, enable_events=False,
+                   [sg.Multiline(default_text=instruction_text, size=(75, 19), disabled=True, enable_events=False,
                                  font=("Calibri, 20"), pad=(5, 5))]]
 
     # LAYOUT
@@ -99,7 +111,7 @@ Do not close this window!""")
     # WINDOW
     window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
-                       resizable=True, icon=("src/BitB.ico"))
+                       resizable=True, icon=("src/images/BitB.ico"))
 
     # Setting things up!
     canvas_elem = window['-CANVAS-']
@@ -115,38 +127,51 @@ Do not close this window!""")
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
         elif event == 'ac_button':
-            global thread_cap
-            if not thread_cap:
-                thread_cap = True
-                threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
-                window['ac_button'].update("Stop")
-                window["stat_ac"].update("  Capturing", text_color="green")
+            if rm.test_bit_time_rate(values["ac_bit_count"], values["ac_time_count"]):
+                global thread_cap
+                if not thread_cap:
+                    thread_cap = True
+                    threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
+                    window['ac_button'].update("Stop")
+                    window["stat_ac"].update("  Collecting", text_color="green")
+                else:
+                    thread_cap = False
+                    window['ac_button'].update("Start")
+                    window["stat_ac"].update("        Idle", text_color="orange")
             else:
-                thread_cap = False
-                window['ac_button'].update("Start")
-                window["stat_ac"].update("        Idle", text_color="orange")
+                pass
         elif event == "out_folder":
             rm.open_folder()
         elif event == "Generate":
-            rm.file_to_excel(values["open_file"], values["an_bit_count"], values["an_time_count"])
-        elif event == 'live_plot':
-            global thread_live
-            if not thread_live:
-                thread_live = True
-                ax.clear()
-                threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
-                window['live_plot'].update("Stop")
-                window["stat_live"].update("  Capturing", text_color="green")
+            if rm.test_bit_time_rate(values["an_bit_count"], values["an_time_count"]):
+                rm.file_to_excel(values["open_file"], values["an_bit_count"], values["an_time_count"])
             else:
-                thread_live = False
-                window['live_plot'].update("Start")
-                window["stat_live"].update("        Idle", text_color="orange")
+                pass
+        elif event == 'live_plot':
+            if rm.test_bit_time_rate(values["live_bit_count"], values["live_time_count"]):
+                global thread_live
+                if not thread_live:
+                    thread_live = True
+                    ax.clear()
+                    threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
+                    window['live_plot'].update("Stop")
+                    window["stat_live"].update("  Collecting", text_color="green")
+                else:
+                    thread_live = False
+                    window['live_plot'].update("Start")
+                    window["stat_live"].update("        Idle", text_color="orange")
+            else:
+                pass
         # Live Plot on Loop
         ax.plot(index_number_array, zscore_array, color='orange')
         ax.set_title("Live Plot")
-        ax.set_xlabel(f'One sample every {values["live_time_count"]} second(s)', fontsize=10)
+        ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
         ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
+        start = time.time()
         fig_agg.draw()
+        #multiprocessing.Process(target=fig_agg.draw(), daemon=True).start()
+        end = time.time()
+        print(end - start)
     window.close()
 
 
@@ -166,15 +191,17 @@ def bit_cap(values, window):
     sample_value = int(values["ac_bit_count"])
     interval_value = int(values["ac_time_count"])
     global thread_cap
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(
-                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
-                stdout=subprocess.PIPE)
-            chunk = proc.stdout
+            proc = subprocess.Popen(
+                f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
+                stdout=subprocess.PIPE, startupinfo=startupinfo)
+            chunk = proc.stdout.read()
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
@@ -266,20 +293,22 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     xor_value = values['live_combo']
     sample_value = int(values["live_bit_count"])
     interval_value = int(values["live_time_count"])
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
-    csv_ones = []
-    zscore_array = []
-    index_number_array = []
+    csv_ones = np.array([])
+    zscore_array = np.array([])
+    index_number_array = np.array([])
     while thread_live:
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.run(
-                f'datafiles/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}',
-                stdout=subprocess.PIPE)
-            chunk = proc.stdout
+            proc = subprocess.Popen(
+                f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
+                stdout=subprocess.PIPE, startupinfo=startupinfo)
+            chunk = proc.stdout.read()
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
@@ -293,16 +322,16 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
             window["stat_live"].update("        Idle", text_color="orange")
             break
         num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
-        csv_ones.append(num_ones_array)
+        csv_ones = np.append(csv_ones, num_ones_array)
         sums_csv = sum(csv_ones)
         avrg_csv = sums_csv / index_number
         zscore_csv = (avrg_csv - (sample_value / 2)) / (((sample_value / 4) ** 0.5) / (index_number ** 0.5))
-        zscore_array.append(zscore_csv)
-        index_number_array.append(index_number)
+        zscore_array = np.append(zscore_array, zscore_csv)
+        index_number_array = np.append(index_number_array, index_number)
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
             write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
-        #print(interval_value - (end_cap - start_cap))
+        # print(interval_value - (end_cap - start_cap))
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
