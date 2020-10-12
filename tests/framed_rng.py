@@ -13,7 +13,7 @@ import serial
 from serial.tools import list_ports
 
 # Internal imports
-import teste_module as rm
+from tests import teste_module as rm
 
 global thread_live
 thread_live = False
@@ -31,7 +31,7 @@ def main():
 Wait for the application to load!
 Do not close this window!""")
 
-    with open("src/others/instructions.txt", "r", encoding="utf8") as f:
+    with open("../src/others/instructions.txt", "r", encoding="utf8") as f:
         texto = f.read()
 
     # THEME
