@@ -8,6 +8,7 @@ from time import localtime, strftime
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 from matplotlib import style
+import pandas._libs.tslibs.base
 from bitstring import BitArray
 import serial
 from serial.tools import list_ports
