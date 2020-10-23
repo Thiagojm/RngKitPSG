@@ -8,7 +8,7 @@ from time import localtime, strftime
 # External imports
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
-from matplotlib import style
+from matplotlib import style, animation
 from matplotlib.animation import FuncAnimation
 from bitstring import BitArray
 import serial
@@ -118,12 +118,14 @@ Do not close this window!""")
     canvas = canvas_elem.TKCanvas
     # draw the intitial plot
     style.use("ggplot")
+    global ax
     fig, ax = plt.subplots(figsize=(10, 5), dpi=100)
     fig_agg = rm.draw_figure(canvas, fig)
 
     # LOOP
     while True:
-        event, values = window.read(timeout=200)
+        global values
+        event, values = window.read(timeout=100)
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
         elif event == 'ac_button':
@@ -163,16 +165,27 @@ Do not close this window!""")
             else:
                 pass
         # Live Plot on Loop
-        ax.plot(index_number_array, zscore_array, color='orange')
-        ax.set_title("Live Plot")
-        ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
-        ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
-        start = time.time()
-        fig_agg.draw()
-        #multiprocessing.Process(target=fig_agg.draw(), daemon=True).start()
-        end = time.time()
-        print(end - start)
+        # ax.plot(index_number_array, zscore_array, color='orange')
+        # ax.set_title("Live Plot")
+        # ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
+        # ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
+        # start = time.time()
+        # fig_agg.draw()
+        # end = time.time()
+        # print(end - start)
+        ani = animation.FuncAnimation(fig, animate, interval=200)
     window.close()
+
+def animate(fig):
+    global ax
+    global values
+    #print(ax, values)
+
+    #ax.clear()
+    ax.plot(index_number_array, zscore_array, color='orange')
+    ax.set_title("Live Plot")
+    ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
+    ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
 
 
 # ---------------- Acquire Data Functions -------
