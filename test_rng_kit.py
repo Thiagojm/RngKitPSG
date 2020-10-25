@@ -19,8 +19,6 @@ from serial.tools import list_ports
 import test_module as rm
 
 # Setting Globals
-global thread_live
-thread_live = False
 global thread_cap
 thread_cap = False
 global index_number_array
@@ -144,10 +142,14 @@ Do not close this window!""")
                     threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
                     window['ac_button'].update("Stop")
                     window["stat_ac"].update("  Collecting", text_color="green")
+                    window['live_plot'].update("Stop")
+                    window["stat_live"].update("  Collecting", text_color="green")
                 else:
                     thread_cap = False
                     window['ac_button'].update("Start")
                     window["stat_ac"].update("        Idle", text_color="orange")
+                    window['live_plot'].update("Start")
+                    window["stat_live"].update("        Idle", text_color="orange")
             else:
                 pass
         elif event == "out_folder":
@@ -159,17 +161,21 @@ Do not close this window!""")
                 pass
         elif event == 'live_plot':
             if rm.test_bit_time_rate(values["live_bit_count"], values["live_time_count"]):
-                global thread_live
-                if not thread_live:
-                    thread_live = True
+
+                if not thread_cap:
+                    thread_cap = True
                     ax.clear()
                     threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
                     window['live_plot'].update("Stop")
                     window["stat_live"].update("  Collecting", text_color="green")
+                    window['ac_button'].update("Stop")
+                    window["stat_ac"].update("  Collecting", text_color="green")
                 else:
-                    thread_live = False
+                    thread_cap = False
                     window['live_plot'].update("Start")
                     window["stat_live"].update("        Idle", text_color="orange")
+                    window['ac_button'].update("Start")
+                    window["stat_ac"].update("        Idle", text_color="orange")
             else:
                 pass
         # Live Plot on Loop
@@ -304,10 +310,10 @@ def live_plot(values, window):
 
 
 def livebblaWin(values, window):  # Function to take live data from bitbabbler
-    global thread_live
+    global thread_cap
     global zscore_array
     global index_number_array
-    thread_live = True
+    thread_cap = True
     xor_value = values['live_combo']
     sample_value = int(values["live_bit_count"])
     interval_value = int(values["live_time_count"])
@@ -319,7 +325,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     csv_ones = []
     zscore_array = []
     index_number_array = []
-    while thread_live:
+    while thread_cap:
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
@@ -331,7 +337,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
         if not bin_ascii:
-            thread_live = False
+            thread_cap = False
             sg.popup_non_blocking('WARNING !!!',
                                   "Something went wrong, is the device attached? Attach it and try again!!!",
                                   keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
@@ -357,10 +363,10 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
 
 
 def trng3live(values, window):
-    global thread_live
+    global thread_cap
     global zscore_array
     global index_number_array
-    thread_live = True
+    thread_cap = True
     sample_value = int(values["live_bit_count"])
     interval_value = int(values["live_time_count"])
     file_name = time.strftime(f"%Y%m%d-%H%M%S_trng_s{sample_value}_i{interval_value}")
@@ -377,14 +383,14 @@ def trng3live(values, window):
         if temp[1].startswith("TrueRNG"):
             if rng_com_port == None:  # always chooses the 1st TrueRNG found
                 rng_com_port = str(temp[0])
-    while thread_live:
+    while thread_cap:
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
             try:
                 ser = serial.Serial(port=rng_com_port, timeout=10)  # timeout set at 10 seconds in case the read fails
             except Exception:
-                thread_live = False
+                thread_cap = False
                 rm.popupmsg("Warning!", f"Port Not Usable! Do you have permissions set to read {rng_com_port}?")
                 window['live_plot'].update("Start")
                 window["stat_live"].update("        Idle", text_color="orange")
@@ -394,7 +400,7 @@ def trng3live(values, window):
                 try:
                     ser.open()
                 except Exception:
-                    thread_live = False
+                    thread_cap = False
                     sg.popup_non_blocking('WARNING !!!',
                                           "Something went wrong, is the device attached? Attach it and try again!!!",
                                           keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
@@ -409,7 +415,7 @@ def trng3live(values, window):
             try:
                 chunk = ser.read(blocksize)  # read bytes from serial port
             except Exception:
-                thread_live = False
+                thread_cap = False
                 rm.popupmsg("Warning!", "Read Failed!!!")
                 window['live_plot'].update("Start")
                 window["stat_live"].update("        Idle", text_color="orange")
