@@ -122,11 +122,7 @@ Do not close this window!""")
     canvas = FigureCanvasTkAgg(f, canvas)
     canvas.draw()
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
-
-    t0 = time.time()
     ani = animation.FuncAnimation(f, animate, interval=1000)
-    t1 = time.time()
-    print(t1 - t0)
 
     # LOOP
     while True:

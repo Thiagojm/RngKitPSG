@@ -109,7 +109,7 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+    window = sg.Window("RngKit ver 2.1 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
                        resizable=True, icon=("src/images/BitB.ico"))
 
@@ -122,11 +122,7 @@ Do not close this window!""")
     canvas = FigureCanvasTkAgg(f, canvas)
     canvas.draw()
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
-
-    t0 = time.time()
     ani = animation.FuncAnimation(f, animate, interval=1000)
-    t1 = time.time()
-    print(t1 - t0)
 
     # LOOP
     while True:
