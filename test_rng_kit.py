@@ -4,16 +4,16 @@ import threading
 import subprocess
 from time import localtime, strftime
 
-
 # External imports
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
-from matplotlib import style, animation
-from matplotlib.animation import FuncAnimation
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
+from matplotlib import style
 from bitstring import BitArray
 import serial
 from serial.tools import list_ports
-import numpy as np
 
 # Internal imports
 import test_module as rm
@@ -24,9 +24,9 @@ thread_live = False
 global thread_cap
 thread_cap = False
 global index_number_array
-index_number_array = np.array([])
+index_number_array = []
 global zscore_array
-zscore_array = np.array([])
+zscore_array = []
 
 
 def main():
@@ -118,14 +118,24 @@ Do not close this window!""")
     canvas = canvas_elem.TKCanvas
     # draw the intitial plot
     style.use("ggplot")
-    global ax
-    fig, ax = plt.subplots(figsize=(10, 5), dpi=100)
-    fig_agg = rm.draw_figure(canvas, fig)
+    global a
+    f, a = plt.subplots(figsize=(10, 4.25), dpi=100)
+
+    #a = f.add_subplot(111)
+    index_number_array = []
+    zscore_array = []
+    canvas = FigureCanvasTkAgg(f, canvas)
+    canvas.draw()
+    canvas.get_tk_widget().grid(row=1, column=0)
+
+    t0 = time.time()
+    ani = animation.FuncAnimation(f, animate, interval=1000)
+    t1 = time.time()
+    print(t1 - t0)
 
     # LOOP
     while True:
-        global values
-        event, values = window.read(timeout=100)
+        event, values = window.read()
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
         elif event == 'ac_button':
@@ -154,7 +164,7 @@ Do not close this window!""")
                 global thread_live
                 if not thread_live:
                     thread_live = True
-                    ax.clear()
+                    a.clear()
                     threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
                     window['live_plot'].update("Stop")
                     window["stat_live"].update("  Collecting", text_color="green")
@@ -165,27 +175,22 @@ Do not close this window!""")
             else:
                 pass
         # Live Plot on Loop
-        # ax.plot(index_number_array, zscore_array, color='orange')
-        # ax.set_title("Live Plot")
-        # ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
-        # ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
-        # start = time.time()
-        # fig_agg.draw()
-        # end = time.time()
-        # print(end - start)
-        ani = animation.FuncAnimation(fig, animate, interval=200)
+
     window.close()
 
-def animate(fig):
-    global ax
-    global values
-    #print(ax, values)
 
-    #ax.clear()
-    ax.plot(index_number_array, zscore_array, color='orange')
-    ax.set_title("Live Plot")
-    ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
-    ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
+
+def animate(i):
+    global a
+    global index_number_array
+    global zscore_array
+    xar = index_number_array
+    yar = zscore_array
+    a.clear()
+    a.plot(xar, yar, color='orange')
+    a.set_title("Live Plot")
+    a.set_xlabel(f'Number of samples (one sample every  second(s))', fontsize=10)
+    a.set_ylabel(f'Z-Score - Sample Size =  bits', fontsize='medium')
 
 
 # ---------------- Acquire Data Functions -------
@@ -311,9 +316,9 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     file_name = time.strftime(f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
-    csv_ones = np.array([])
-    zscore_array = np.array([])
-    index_number_array = np.array([])
+    csv_ones = []
+    zscore_array = []
+    index_number_array = []
     while thread_live:
         start_cap = time.time()
         index_number += 1
@@ -335,12 +340,12 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
             window["stat_live"].update("        Idle", text_color="orange")
             break
         num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
-        csv_ones = np.append(csv_ones, num_ones_array)
+        csv_ones.append(num_ones_array)
         sums_csv = sum(csv_ones)
         avrg_csv = sums_csv / index_number
         zscore_csv = (avrg_csv - (sample_value / 2)) / (((sample_value / 4) ** 0.5) / (index_number ** 0.5))
-        zscore_array = np.append(zscore_array, zscore_csv)
-        index_number_array = np.append(index_number_array, index_number)
+        zscore_array.append(zscore_csv)
+        index_number_array.append(index_number)
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
             write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
         end_cap = time.time()
