@@ -7,6 +7,8 @@ from time import localtime, strftime
 # External imports
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.animation as animation
 from matplotlib import style
 from bitstring import BitArray
 import serial
@@ -24,6 +26,8 @@ global index_number_array
 index_number_array = []
 global zscore_array
 zscore_array = []
+global values
+values = None
 
 
 def main():
@@ -78,11 +82,11 @@ Do not close this window!""")
                       [sg.Radio('BitBabbler', "radio_graph", k="bit_live", default=True)],
                       [sg.Radio('TrueRNG3', "radio_graph", k="true3_live")]]
 
-    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2):", size=(16,1)),
+    column_graph_2 = [[sg.T("RAW(0)/XOR (1,2):", size=(16, 1)),
                        sg.InputCombo((0, 1), default_value=0, size=(5, 1), k="live_combo", enable_events=False,
-                                     readonly=True), sg.T(" ", size=(9,1))],
-                      [sg.T("Sample Size (bits):", size=(16,1)), sg.Input("2048", k="live_bit_count", size=(6, 1))],
-                      [sg.T("Sample Interval (s):", size=(16,1)), sg.Input("1", k="live_time_count", size=(6, 1))]]
+                                     readonly=True), sg.T(" ", size=(9, 1))],
+                      [sg.T("Sample Size (bits):", size=(16, 1)), sg.Input("2048", k="live_bit_count", size=(6, 1))],
+                      [sg.T("Sample Interval (s):", size=(16, 1)), sg.Input("1", k="live_time_count", size=(6, 1))]]
 
     column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))], [sg.T("")],
                       [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
@@ -106,21 +110,29 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.0.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+    window = sg.Window("RngKit ver 2.1.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
                        resizable=True, icon=("src/images/BitB.ico"))
 
     # Setting things up!
     canvas_elem = window['-CANVAS-']
     canvas = canvas_elem.TKCanvas
-    # draw the intitial plot
     style.use("ggplot")
-    fig, ax = plt.subplots(figsize=(10, 5), dpi=100)
-    fig_agg = rm.draw_figure(canvas, fig)
+    global ax
+    f, ax = plt.subplots(figsize=(10, 4.4), dpi=100)
+    canvas = FigureCanvasTkAgg(f, canvas)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+
+    t0 = time.time()
+    ani = animation.FuncAnimation(f, animate, interval=1000)
+    t1 = time.time()
+    print(t1 - t0)
 
     # LOOP
     while True:
-        event, values = window.read(timeout=200)
+        global values
+        event, values = window.read()
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
         elif event == 'ac_button':
@@ -158,14 +170,25 @@ Do not close this window!""")
                     window['live_plot'].update("Start")
                     window["stat_live"].update("        Idle", text_color="orange")
             else:
-                pass
-        # Live Plot on Loop
-        ax.plot(index_number_array, zscore_array, color='orange')
-        ax.set_title("Live Plot")
+                pass  # Live Plot on Loop
+
+    window.close()
+
+
+def animate(i):
+    global ax
+    global index_number_array
+    global zscore_array
+    global values
+    ax.clear()
+    ax.plot(index_number_array, zscore_array, color='orange')
+    ax.set_title("Live Plot")
+    if not values:
+        ax.set_xlabel(f'Number of samples (one sample every 1 second(s))', fontsize=10)
+        ax.set_ylabel(f'Z-Score - Sample Size = 2048 bits', fontsize='medium')
+    else:
         ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
         ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
-        fig_agg.draw()
-    window.close()
 
 
 # ---------------- Acquire Data Functions -------

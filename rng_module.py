@@ -16,13 +16,6 @@ def popupmsg(msg_title, msg):
                           icon="src/images/BitB.ico")
 
 
-def draw_figure(canvas, figure):
-    figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
-    figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
-    return figure_canvas_agg
-
-
 def open_folder():
     script_path = os.getcwd()
     path = f"{script_path}/1-SavedFiles/"

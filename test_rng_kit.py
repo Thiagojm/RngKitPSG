@@ -27,6 +27,8 @@ global index_number_array
 index_number_array = []
 global zscore_array
 zscore_array = []
+global values
+values = None
 
 
 def main():
@@ -116,17 +118,12 @@ Do not close this window!""")
     # Setting things up!
     canvas_elem = window['-CANVAS-']
     canvas = canvas_elem.TKCanvas
-    # draw the intitial plot
     style.use("ggplot")
-    global a
-    f, a = plt.subplots(figsize=(10, 4.25), dpi=100)
-
-    #a = f.add_subplot(111)
-    index_number_array = []
-    zscore_array = []
+    global ax
+    f, ax = plt.subplots(figsize=(10, 4.4), dpi=100)
     canvas = FigureCanvasTkAgg(f, canvas)
     canvas.draw()
-    canvas.get_tk_widget().grid(row=1, column=0)
+    canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
 
     t0 = time.time()
     ani = animation.FuncAnimation(f, animate, interval=1000)
@@ -135,6 +132,7 @@ Do not close this window!""")
 
     # LOOP
     while True:
+        global values
         event, values = window.read()
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
@@ -164,7 +162,7 @@ Do not close this window!""")
                 global thread_live
                 if not thread_live:
                     thread_live = True
-                    a.clear()
+                    ax.clear()
                     threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
                     window['live_plot'].update("Stop")
                     window["stat_live"].update("  Collecting", text_color="green")
@@ -179,18 +177,20 @@ Do not close this window!""")
     window.close()
 
 
-
 def animate(i):
-    global a
+    global ax
     global index_number_array
     global zscore_array
-    xar = index_number_array
-    yar = zscore_array
-    a.clear()
-    a.plot(xar, yar, color='orange')
-    a.set_title("Live Plot")
-    a.set_xlabel(f'Number of samples (one sample every  second(s))', fontsize=10)
-    a.set_ylabel(f'Z-Score - Sample Size =  bits', fontsize='medium')
+    global values
+    ax.clear()
+    ax.plot(index_number_array, zscore_array, color='orange')
+    ax.set_title("Live Plot")
+    if not values:
+        ax.set_xlabel(f'Number of samples (one sample every 1 second(s))', fontsize=10)
+        ax.set_ylabel(f'Z-Score - Sample Size = 2048 bits', fontsize='medium')
+    else:
+        ax.set_xlabel(f'Number of samples (one sample every {values["live_time_count"]} second(s))', fontsize=10)
+        ax.set_ylabel(f'Z-Score - Sample Size = {values["live_bit_count"]} bits', fontsize='medium')
 
 
 # ---------------- Acquire Data Functions -------
