@@ -177,7 +177,7 @@ frm_no_follow = sg.InputText("", size=(60, 2), key="no-follow", do_not_clear=Tru
 frm_packages = sg.InputText("", size=(60, 2), key="packages", do_not_clear=True)
 frm_modules = sg.InputText("", size=(60, 2), key="modules", do_not_clear=True)
 frm_plugins = sg.InputText("", size=(60, 2), key="plugin-dir", do_not_clear=True)
-frm_more = sg.InputText("--windows-dependency-tool=pefile --experimental=use_pefile_recurse --show-progress --show-scons", key="add-args", size=(60, 2), do_not_clear=True)
+frm_more = sg.InputText("--mingw64 --windows-dependency-tool=pefile --experimental=use_pefile_recurse --show-progress --show-scons", key="add-args", size=(60, 2), do_not_clear=True)
 form = sg.FlexForm("Nuitka Standalone EXE Generation")
 
 compile_to = pscript = icon_file = ""

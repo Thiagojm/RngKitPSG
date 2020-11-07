@@ -4,6 +4,7 @@ import os
 
 # External imports
 import pandas as pd
+import pandas._libs.tslibs.base
 import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from bitstring import BitArray
