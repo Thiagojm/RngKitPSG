@@ -2,7 +2,7 @@
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
 thiagojm1984@hotmail.com  
-Written in Python 3.7.9
+Written in Python 3.8.7
 -----------------------
 
 # ABSTRACT

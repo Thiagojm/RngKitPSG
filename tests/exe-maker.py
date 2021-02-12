@@ -16,6 +16,7 @@
 #     limitations under the License.
 #
 
+
 import sys
 import os
 import subprocess as sp
@@ -177,10 +178,8 @@ frm_no_follow = sg.InputText("", size=(60, 2), key="no-follow", do_not_clear=Tru
 frm_packages = sg.InputText("", size=(60, 2), key="packages", do_not_clear=True)
 frm_modules = sg.InputText("", size=(60, 2), key="modules", do_not_clear=True)
 frm_plugins = sg.InputText("", size=(60, 2), key="plugin-dir", do_not_clear=True)
-frm_more = sg.InputText("--mingw64 --windows-dependency-tool=pefile --show-progress --show-scons", key="add-args", size=(60, 2), do_not_clear=True)
+frm_more = sg.InputText("--mingw64 --windows-dependency-tool=pefile --experimental=use_pefile_recurse --show-progress --show-scons", key="add-args", size=(60, 2), do_not_clear=True)
 form = sg.FlexForm("Nuitka Standalone EXE Generation")
-
-# --experimental=use_pefile_recurse
 
 compile_to = pscript = icon_file = ""
 
@@ -277,7 +276,7 @@ pscript_n, ext = os.path.splitext(pscript)
 pscript_dist = pscript_n + ".dist"
 pscript_build = pscript_n + ".build"
 
-cmd = ["python", "-m", "nuitka", "--standalone", "--python-flag=nosite"]
+cmd = ["python", "-m", "nuitka", "--standalone"]
 
 if not val["use-console"] or ext.lower() == ".pyw":
     cmd.append("--windows-disable-console")
@@ -292,7 +291,7 @@ if val["remove-build"]:
     cmd.append("--remove-output")
 
 if icon_file:
-    cmd.append('--windows-icon="%s"' % icon_file)
+    cmd.append('--windows-icon-from-ico="%s"' % icon_file)
 
 if compile_to:
     compile_to = os.path.abspath(compile_to)
@@ -306,18 +305,18 @@ cmd.append(output)
 
 if val["qt-support"]:
     cmd.append("--plugin-enable=qt-plugins")
-else:
-    cmd.append("--recurse-not-to=PIL.ImageQt")
+# else:
+#     cmd.append("--recurse-not-to=PIL.ImageQt")
 
 if val["tk-support"]:
     cmd.append("--plugin-enable=tk-inter")
-else:
-    cmd.append("--recurse-not-to=PIL.ImageTk")
+# else:
+#     cmd.append("--recurse-not-to=PIL.ImageTk")
 
 if val["np-support"]:
     cmd.append("--plugin-enable=numpy")
-else:
-    cmd.append("--recurse-not-to=numpy")
+# else:
+#     cmd.append("--recurse-not-to=numpy")
 
 if val["follow"]:
     tab = val["follow"].split(",")

@@ -1,8 +1,8 @@
-# RngKit 2.1
+# RngKit 2.0
 by Thiago Jung
 https://github.com/Thiagojm/RngKitPSG
 thiagojm1984@hotmail.com
-Written in Python 3.7.9
+Written in Python 3.8.7
 -----------------------
 
 # ABSTRACT
@@ -61,3 +61,12 @@ For example "20201011-142208_bitb_s2048_i1_f0": Collected on November 11, 2020, 
 MIT License
 
 Copyright (c) 2020 Thiago Jung Mendaçolli
+
+# ScreenShots
+
+![image](https://user-images.githubusercontent.com/30575561/99856631-24449680-2b68-11eb-9d12-2537df1ddb6a.png)
+
+![image](https://user-images.githubusercontent.com/30575561/99856669-3aeaed80-2b68-11eb-85e5-5df83d0e19a3.png)
+
+![image](https://user-images.githubusercontent.com/30575561/99856685-45a58280-2b68-11eb-9a5b-a7f71be7dd32.png)
+

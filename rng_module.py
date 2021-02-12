@@ -78,7 +78,8 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
         else:
             popupmsg("Warning", 'Wrong File Type, Select a .bin or .csv file')
             pass
-    except Exception:
+    except Exception as e:
+        print(e)
         popupmsg("Error",
                  'Something went wrong, please check the parameters and try again. Is the target file already open?')
 
