@@ -7,8 +7,7 @@ from time import localtime, strftime
 # External imports
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.animation as animation
 from matplotlib import style
 from bitstring import BitArray
@@ -127,27 +126,27 @@ Do not close this window!""")
     # LOOP
     while True:
         global values
+        global thread_cap
         event, values = window.read()
         if event == sg.WIN_CLOSED:  # always,  always give a way out!
             break
         elif event == 'ac_button':
-            if rm.test_bit_time_rate(values["ac_bit_count"], values["ac_time_count"]):
-                global thread_cap
                 if not thread_cap:
-                    thread_cap = True
-                    threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
-                    window['ac_button'].update("Stop")
-                    window["stat_ac"].update("  Collecting", text_color="green")
-                    window['live_plot'].update("Stop")
-                    window["stat_live"].update("  Collecting", text_color="green")
+                    if rm.test_bit_time_rate(values["ac_bit_count"], values["ac_time_count"]) and rm.check_usb_cap(values):
+                        thread_cap = True
+                        threading.Thread(target=ac_data, args=(values, window), daemon=True).start()
+                        window['ac_button'].update("Stop")
+                        window["stat_ac"].update("  Collecting", text_color="green")
+                        window['live_plot'].update("Stop")
+                        window["stat_live"].update("  Collecting", text_color="green")
                 else:
                     thread_cap = False
+                    print("krai")
                     window['ac_button'].update("Start")
                     window["stat_ac"].update("        Idle", text_color="orange")
                     window['live_plot'].update("Start")
                     window["stat_live"].update("        Idle", text_color="orange")
-            else:
-                pass
+
         elif event == "out_folder":
             rm.open_folder()
         elif event == "Generate":
@@ -156,9 +155,8 @@ Do not close this window!""")
             else:
                 pass
         elif event == 'live_plot':
-            if rm.test_bit_time_rate(values["live_bit_count"], values["live_time_count"]):
-
-                if not thread_cap:
+            if not thread_cap:
+                if rm.test_bit_time_rate(values["live_bit_count"], values["live_time_count"]) and rm.check_usb_live(values):
                     thread_cap = True
                     ax.clear()
                     threading.Thread(target=live_plot, args=(values, window), daemon=True).start()
@@ -166,14 +164,12 @@ Do not close this window!""")
                     window["stat_live"].update("  Collecting", text_color="green")
                     window['ac_button'].update("Stop")
                     window["stat_ac"].update("  Collecting", text_color="green")
-                else:
-                    thread_cap = False
-                    window['live_plot'].update("Start")
-                    window["stat_live"].update("        Idle", text_color="orange")
-                    window['ac_button'].update("Start")
-                    window["stat_ac"].update("        Idle", text_color="orange")
             else:
-                pass  # Live Plot on Loop
+                thread_cap = False
+                window['live_plot'].update("Start")
+                window["stat_live"].update("        Idle", text_color="orange")
+                window['ac_button'].update("Start")
+                window["stat_ac"].update("        Idle", text_color="orange")
 
     window.close()
 
@@ -232,7 +228,9 @@ def bit_cap(values, window):
                                   icon="src/BitB.ico")
             window['ac_button'].update("Start")
             window["stat_ac"].update("        Idle", text_color="orange")
-            break
+            window['live_plot'].update("Start")
+            window["stat_live"].update("        Idle", text_color="orange")
+            return
         num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         with open(file_name + '.csv', "a+") as write_file:  # open file and append time and number of ones
             write_file.write(f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
@@ -271,6 +269,8 @@ def trng3_cap(values, window):
                 thread_cap = False
                 window['ac_button'].update("Start")
                 window["stat_ac"].update("        Idle", text_color="orange")
+                window['live_plot'].update("Start")
+                window["stat_live"].update("        Idle", text_color="orange")
                 break
             try:
                 x = ser.read(blocksize)  # read bytes from serial port
@@ -279,6 +279,8 @@ def trng3_cap(values, window):
                 thread_cap = False
                 window['ac_button'].update("Start")
                 window["stat_ac"].update("        Idle", text_color="orange")
+                window['live_plot'].update("Start")
+                window["stat_live"].update("        Idle", text_color="orange")
                 break
             bin_file.write(x)
             ser.close()
@@ -339,7 +341,9 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
                                   icon="src/BitB.ico")
             window['live_plot'].update("Start")
             window["stat_live"].update("        Idle", text_color="orange")
-            break
+            window['ac_button'].update("Start")
+            window["stat_ac"].update("        Idle", text_color="orange")
+            return
         num_ones_array = bin_ascii.count('1')  # count numbers of ones in the string
         csv_ones.append(num_ones_array)
         sums_csv = sum(csv_ones)
@@ -355,7 +359,6 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
-
 
 def trng3live(values, window):
     global thread_cap
@@ -389,6 +392,8 @@ def trng3live(values, window):
                 rm.popupmsg("Warning!", f"Port Not Usable! Do you have permissions set to read {rng_com_port}?")
                 window['live_plot'].update("Start")
                 window["stat_live"].update("        Idle", text_color="orange")
+                window['ac_button'].update("Start")
+                window["stat_ac"].update("        Idle", text_color="orange")
                 return
             # Open the serial port if it isn't open
             if (ser.isOpen() == False):
@@ -402,6 +407,8 @@ def trng3live(values, window):
                                           icon="src/BitB.ico")
                     window['live_plot'].update("Start")
                     window["stat_live"].update("        Idle", text_color="orange")
+                    window['ac_button'].update("Start")
+                    window["stat_ac"].update("        Idle", text_color="orange")
                     return
             # Set Data Terminal Ready to start flow
             ser.setDTR(True)
@@ -414,6 +421,8 @@ def trng3live(values, window):
                 rm.popupmsg("Warning!", "Read Failed!!!")
                 window['live_plot'].update("Start")
                 window["stat_live"].update("        Idle", text_color="orange")
+                window['ac_button'].update("Start")
+                window["stat_ac"].update("        Idle", text_color="orange")
                 return
             bin_file.write(chunk)
             # Close the serial port

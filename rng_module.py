@@ -1,16 +1,13 @@
 # Default imports
 import re
 import os
+import subprocess
 
 # External imports
 import pandas as pd
-import pandas._libs.tslibs.base
 import PySimpleGUI as sg
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from bitstring import BitArray
-
-
-# Internal imports
+from serial.tools import list_ports
 
 def popupmsg(msg_title, msg):
     sg.popup_non_blocking(msg_title, msg, keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
@@ -22,6 +19,75 @@ def open_folder():
     path = f"{script_path}/1-SavedFiles/"
     path = os.path.realpath(path)
     os.startfile(path)
+
+
+def check_usb_cap(values):
+    if values["bit_ac"]:
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f0 -b 1",
+            stdout=subprocess.PIPE, startupinfo=startupinfo)
+        chunk = proc.stdout.read()
+        if chunk:
+            return True
+        else:
+            popupmsg("Error", "Check if the the selected device is attached.")
+            return False
+    elif values['true3_ac']:
+        ports_avaiable = list(list_ports.comports())
+        rng_com_port = None
+        for temp in ports_avaiable:
+            if temp[1].startswith("TrueRNG"):
+                if rng_com_port == None:  # always chooses the 1st TrueRNG found
+                    rng_com_port = str(temp[0])
+        if rng_com_port:
+            return True
+        else:
+            popupmsg("Error", "Check if the the selected device is attached.")
+            return False
+    elif values["true3_bit_ac"]:
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f0 -b 1", stdout=subprocess.PIPE,
+                                startupinfo=startupinfo)
+        chunk = proc.stdout.read()
+        ports_avaiable = list(list_ports.comports())
+        rng_com_port = None
+        for temp in ports_avaiable:
+            if temp[1].startswith("TrueRNG"):
+                if rng_com_port == None:  # always chooses the 1st TrueRNG found
+                    rng_com_port = str(temp[0])
+        if rng_com_port and chunk:
+            return True
+        else:
+            popupmsg("Error", "Check if the the selected devices are attached.")
+            return False
+
+
+def check_usb_live(values):
+    if values['bit_live']:
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f0 -b 1",
+            stdout=subprocess.PIPE, startupinfo=startupinfo)
+        chunk = proc.stdout.read()
+        if chunk:
+            return True
+        else:
+            popupmsg("Error", "Check if the the selected device is attached.")
+            return False
+    elif values['true3_live']:
+        ports_avaiable = list(list_ports.comports())
+        rng_com_port = None
+        for temp in ports_avaiable:
+            if temp[1].startswith("TrueRNG"):
+                if rng_com_port == None:  # always chooses the 1st TrueRNG found
+                    rng_com_port = str(temp[0])
+        if rng_com_port:
+            return True
+        else:
+            popupmsg("Error", "Check if the the selected device is attached.")
+            return False
 
 
 # ----------------- Analyse Data --------------------------
