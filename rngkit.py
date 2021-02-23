@@ -108,7 +108,7 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.1 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+    window = sg.Window("RngKit ver 2.1.1 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
                        resizable=True, icon=("src/images/BitB.ico"))
 
@@ -298,6 +298,8 @@ def trng3_cap(values, window):
 
 
 # ----------------Live Plot Functions------------
+
+# TODO: use secrets to make new capturing function
 
 def live_plot(values, window):
     if values['bit_live']:

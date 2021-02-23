@@ -1,4 +1,4 @@
-# RngKit 2.0
+# RngKit 2.1.1
 by Thiago Jung
 https://github.com/Thiagojm/RngKitPSG
 thiagojm1984@hotmail.com
