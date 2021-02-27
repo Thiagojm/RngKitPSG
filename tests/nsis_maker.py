@@ -5,23 +5,24 @@ class MyTemplate(Template):
     delimiter = '&'
 
 # Change parameters
-appname = "testeapp"
-compname = "testecomp"
-descript = "bla bla bla"
+appname = "RngKit"
+compname = "Conscienciology"
+descript = "This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) for data collection and statistical analysis for several purposes, including mind-matter interaction research."
 vmajor = 2
-vminor = 3
-vbuild = 4
-helpurl = "www.ae.com"
-updateurl = "www.ae.com/seila"
-abouturl = "www.ae.com/seila/mano"
-installsize = 61234
-iconpath = "/src/images/BitB.ico"
+vminor = 1
+vbuild = 2
+helpurl = ""
+updateurl = ""
+abouturl = ""
+installsize = 53041
+iconpath = "src/images/BitB.ico"
 
 # ---------------------------------------------------------------#
 
 
 outfile = f'{appname.replace(" ", "")}-installer-{vmajor}{vminor}{vbuild}.exe'
 iconpathrev = iconpath.replace("/", '\\')
+iconpathrev = f"\\{iconpathrev}"
 
 
 d = {

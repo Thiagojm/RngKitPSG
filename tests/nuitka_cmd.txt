@@ -1,4 +1,0 @@
-python -m nuitka --standalone --windows-dependency-tool=pefile --windows-disable-console --experimental=use_pefile_recurse --plugin-enable=numpy --plugin-enable=tk-inter --show-progress --show-scons .\rngkit.py
-
-obs: adicionado no arquivo - import pandas._libs.tslibs.base
-

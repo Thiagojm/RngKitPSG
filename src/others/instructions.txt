@@ -1,8 +1,8 @@
-# RngKit 2.1.1
+# RngKit 2.1.2
 by Thiago Jung
 https://github.com/Thiagojm/RngKitPSG
 thiagojm1984@hotmail.com
-Written in Python 3.8.7
+Written in Python 3.8.8
 -----------------------
 
 # ABSTRACT
