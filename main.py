@@ -123,6 +123,9 @@ Do not close this window!""")
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
     ani = animation.FuncAnimation(f, animate, interval=1000)
 
+    # Creating checker for the splashscreen
+    open("src/others/checker", mode='w').close()
+
     # LOOP
     while True:
         global values

@@ -1,15 +1,5 @@
-from string import Template
+import pandas as pd
 
-d = {
-    'title': 'This is the title',
-    'subtitle': 'And this is the subtitle',
-    'list': '\n'.join(['first', 'second', 'third'])
-}
-
-with open('nsis_template.txt', 'r') as f:
-    src = Template(f.read())
-    result = src.substitute(d)
-    print(result)
-
-with open('nsis_template.txt', 'w') as g:
-    g.write(result)
+teste_file = pd.read_csv(r"D:\Meus Documentos\1-Projetos\RngKitPSG\1-SavedFiles\2019_teste.csv")
+print(teste_file.head())
+print(teste_file.)
