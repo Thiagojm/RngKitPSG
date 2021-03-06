@@ -10,17 +10,18 @@ compname = "Conscienciology"
 descript = "This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) for data collection and statistical analysis for several purposes, including mind-matter interaction research."
 vmajor = 2
 vminor = 1
-vbuild = 2
+vbuild = 4
 helpurl = ""
 updateurl = ""
 abouturl = ""
-installsize = 53041
+installsize = 64542
 iconpath = "src/images/BitB.ico"
+builder = "py"
 
 # ---------------------------------------------------------------#
 
 
-outfile = f'{appname.replace(" ", "")}-installer-{vmajor}{vminor}{vbuild}.exe'
+outfile = f'{appname.replace(" ", "")}-installer-{vmajor}{vminor}{vbuild}-{builder}.exe'
 iconpathrev = iconpath.replace("/", '\\')
 iconpathrev = f"\\{iconpathrev}"
 

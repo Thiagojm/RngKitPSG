@@ -8,6 +8,7 @@ import pandas as pd
 import PySimpleGUI as sg
 from bitstring import BitArray
 from serial.tools import list_ports
+import xlsxwriter
 
 def popupmsg(msg_title, msg):
     sg.popup_non_blocking(msg_title, msg, keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
@@ -144,8 +145,7 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
         else:
             popupmsg("Warning", 'Wrong File Type, Select a .bin or .csv file')
             pass
-    except Exception as e:
-        print(e)
+    except Exception:
         popupmsg("Error",
                  'Something went wrong, please check the parameters and try again. Is the target file already open?')
 
