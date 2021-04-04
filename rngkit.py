@@ -9,6 +9,9 @@ import os
     Copyright 2020 PySimpleGUI.org
 """
 
+if os.path.exists("src/others/checker"):
+    os.remove("src/others/checker")
+
 os.startfile("main.exe")
 
 import PySimpleGUI as sg
