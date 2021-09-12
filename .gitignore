@@ -4,4 +4,5 @@ __pycache__/
 Installer/
 output/
 venv/
-venv38/
+.idea/
+.vscode/
