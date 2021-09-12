@@ -1,0 +1,46 @@
+; Windows INF to load usbser driver for TrueRNG abd TrueRNGv2 hardware random number generator
+; ubld.it
+; http://truerng.org
+; Chris K Cockrum (https://cockrum.net)
+
+[Strings] 
+MFGNAME="ubld.it"
+DEVNAME="TrueRNG Random Number Generator"
+
+[Version] 
+Signature="$Windows NT$" 
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318} 
+Provider=%MFGNAME% 
+DriverVer=02/03/2016,1.0.0.1
+CatalogFile=TrueRNG.cat
+
+[Manufacturer] 
+%MFGNAME%=DeviceList,  NTamd64, NTia64
+
+[DeviceList]
+%DEVNAME%=DriverInstall,USB\VID_04D8&PID_F5FE
+
+[DeviceList.NTamd64]
+%DEVNAME%=DriverInstall,USB\VID_04D8&PID_F5FE
+
+[DeviceList.NTia64]
+%DEVNAME%=DriverInstall,USB\VID_04D8&PID_F5FE
+
+[DefaultInstall]
+CopyINF=TrueRNG.inf
+
+[DriverInstall]
+include=mdmcpq.inf,usb.inf
+CopyFiles = FakeModemCopyFileSection
+AddReg=DriverAddReg
+
+[DriverAddReg]
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,usbser.sys 
+HKR,,EnumPropPages32,,"msports.dll,SerialPortPropPageProvider"
+
+[DriverInstall.Services]
+Include=mdmcpq.inf
+AddService=usbser,0x00000002,LowerFilter_Service_Inst 
+
