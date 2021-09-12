@@ -1,14 +1,5 @@
 import os
 
-"""
-    Demo - Splash Screen
-
-    Displays a PNG image with transparent areas as see-through on the center
-    of the screen for a set amount of time.
-
-    Copyright 2020 PySimpleGUI.org
-"""
-
 if os.path.exists("src/others/checker"):
     os.remove("src/others/checker")
 
