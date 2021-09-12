@@ -2,6 +2,8 @@
 import re
 import os
 import subprocess
+from contextlib import ExitStack
+import time
 
 # External imports
 import pandas as pd
@@ -14,6 +16,20 @@ def popupmsg(msg_title, msg):
     sg.popup_non_blocking(msg_title, msg, keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
                           icon="src/images/BitB.ico")
 
+
+def concat_files(all_filenames):
+    try:
+        file_name = time.strftime(f"%Y%m%d-%H%M%S")
+        with ExitStack() as stack:
+            files = [stack.enter_context(open(fname)) for fname in all_filenames]
+            with open(f"1-SavedFiles/{file_name}_concat.csv", "a") as f:
+                for file in files:
+                    for line in file:
+                        f.write(line)
+        popupmsg("Sucess", f"Concatenated file saved as: 1-SavedFiles/{file_name}_concat.csv")
+    except Exception:
+        popupmsg("Error", "Select valid files")
+                    
 
 def open_folder():
     script_path = os.getcwd()
