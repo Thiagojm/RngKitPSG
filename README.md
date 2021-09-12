@@ -2,7 +2,7 @@
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
 thiagojm1984@hotmail.com  
-Written in Python 3.8.7
+Written in Python 3.9.6
 -----------------------
 
 # ABSTRACT
@@ -43,6 +43,7 @@ To analyse the file and generate a Excel file with z-score and a graph, select a
 Also, be sure the select the correct value for the sample size and sample interval, or you will get wrong result.
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
 This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.
+If you want to concatenate CSV files, browse the files in the "Concatenate Multiples CSV Files". It will create a new concatenated file.
 
 - TAB 2: The second tab is for collecting and presenting a live Zscore x Time chart.
 Select the device to use (BitBabbler can be set to 0 (RAW) or 1 (XOR)).
@@ -60,7 +61,7 @@ For example "20201011-142208_bitb_s2048_i1_f0": Collected on November 11, 2020, 
 
 MIT License
 
-Copyright (c) 2020 Thiago Jung Mendaçolli
+Copyright (c) 2021 Thiago Jung Mendaçolli
 
 # ScreenShots
 
