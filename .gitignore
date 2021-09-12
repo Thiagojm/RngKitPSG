@@ -2,6 +2,7 @@ __pycache__/
 .idea/
 1-SavedFiles/
 Installer/
+Installer
 output/
 venv/
 .idea/
