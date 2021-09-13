@@ -1,0 +1,49 @@
+; Windows INF to load usbser driver for TrueRNGpro hardware random number generator
+; ubld.it
+; http://truerng.org
+; Chris K Cockrum (https://cockrum.net)
+
+[Strings] 
+MFGNAME="ubld.it"
+DEVNAME="TrueRNGpro Random Number Generator"
+
+[Version] 
+Signature="$Windows NT$" 
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318} 
+Provider=%MFGNAME% 
+DriverVer=01/14/2016,1.0.0.3
+CatalogFile=TrueRNGpro.cat
+
+[Manufacturer] 
+%MFGNAME%=DeviceList, NTx86, NTamd64, NTia64
+
+[DeviceList]
+%DEVNAME%=DriverInstall,USB\VID_16D0&PID_0AA0&MI_00
+
+[DeviceList.NTx86]
+%DEVNAME%=DriverInstall,USB\VID_16D0&PID_0AA0&MI_00
+
+[DeviceList.NTamd64]
+%DEVNAME%=DriverInstall,USB\VID_16D0&PID_0AA0&MI_00
+
+[DeviceList.NTia64]
+%DEVNAME%=DriverInstall,USB\VID_16D0&PID_0AA0&MI_00
+
+[DefaultInstall]
+CopyINF=TrueRNGpro.inf
+
+[DriverInstall]
+include=mdmcpq.inf
+CopyFiles = FakeModemCopyFileSection
+AddReg=DriverAddReg
+
+[DriverAddReg]
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,usbser.sys 
+HKR,,EnumPropPages32,,"msports.dll,SerialPortPropPageProvider"
+
+[DriverInstall.Services]
+Include=mdmcpq.inf
+AddService=usbser,0x00000002,LowerFilter_Service_Inst 
+
