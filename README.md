@@ -37,15 +37,15 @@ for data collection and statistical analysis for several purposes, including min
 To collect data, select the device to use, or multiple devices and click "Start". You can set the sample size (in bits) and the sample interval (in seconds). 
 BitBabbler has different capturing options (number of folds), with option 0 being in RAW, options between 1 and 4 in XOR, TrueRNG only works in XOR mode.
 Hit "Stop" when you wish to stop the process. Two files are going to be created inside the "1-SavedFiles" folder. One with .bin extension and another with .csv.
-The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series, usually will be better to analyse the .csv file.
+The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series, usually will be better to analyse the .csv file.  
 > Analysing:
 To analyse the file and generate a Excel file with z-score and a graph, select a previously generated .bin or .csv file whit the "Browse" button.
 Also, be sure the select the correct value for the sample size and sample interval, or you will get wrong result.
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
-This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.
+This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.  
 If you want to concatenate CSV files, browse the files in the "Concatenate Multiples CSV Files". It will create a new concatenated file.
 
-- TAB 2: The second tab is for collecting and presenting a live Zscore x Time chart.
+- TAB 2: The second tab is for collecting and presenting a live Zscore x Time chart.  
 Select the device to use (BitBabbler can be set to 0 (RAW) or 1 (XOR)).
 Click on "Start", the chart will update and at the same time two files will be generated and saved (.bin and .csv).
 When you finish capturing it is important to click "Stop".
