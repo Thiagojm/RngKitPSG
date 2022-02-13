@@ -1,21 +1,45 @@
-import os
-import glob
-import pathlib
-from contextlib import ExitStack
+#!/usr/bin/env python
+import PySimpleGUI as sg
+# Simple example of TabGroup element and the options available to it
 
-os.chdir(pathlib.Path(r"C:\Users\tjmpl\Documents\Projetos\RngKitPSG\1-SavedFiles"))
+sg.theme('Dark Red')     # Please always add color to your window
 
-extension = 'csv'
-all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
-print(all_filenames)
+# The tab 1, 2, 3 layouts - what goes inside the tab
+tab1_layout = [[sg.Text('Tab 1')],
+               [sg.Text('Put your layout in here')],
+               [sg.Text('Input something'), sg.Input(size=(12,1), key='-IN-TAB1-')]]
 
-# for i in all_filenames:
-#     print(i)
+tab2_layout = [[sg.Text('Tab 2')]]
+tab3_layout = [[sg.Text('Tab 3')]]
+tab4_layout = [[sg.Text('Tab 3')]]
 
-with ExitStack() as stack:
-    files = [stack.enter_context(open(fname)) for fname in all_filenames]
-    with open("concat_csv.csv", "a") as f:
-        for file in files:
-            for line in file:
-                f.write(line)
-                
+# The TabgGroup layout - it must contain only Tabs
+tab_group_layout = [[sg.Tab('Tab 1', tab1_layout, font='Courier 15', key='-TAB1-'),
+                     sg.Tab('Tab 2', tab2_layout, visible=False, key='-TAB2-'),
+                     sg.Tab('Tab 3', tab3_layout, key='-TAB3-'),
+                     sg.Tab('Tab 4', tab4_layout, visible=False, key='-TAB4-'),
+                     ]]
+
+# The window layout - defines the entire window
+layout = [[sg.TabGroup(tab_group_layout,
+                       enable_events=True,
+                       key='-TABGROUP-')],
+          [sg.Text('Make tab number'), sg.Input(key='-IN-', size=(3,1)), sg.Button('Invisible'), sg.Button('Visible'), sg.Button('Select')]]
+
+window = sg.Window('My window with tabs', layout, no_titlebar=False)
+
+tab_keys = ('-TAB1-','-TAB2-','-TAB3-', '-TAB4-')         # map from an input value to a key
+while True:
+    event, values = window.read()       # type: str, dict
+    print(event, values)
+    if event == sg.WIN_CLOSED:
+        break
+    # handle button clicks
+    if event == 'Invisible':
+        window[tab_keys[int(values['-IN-'])-1]].update(visible=False)
+    if event == 'Visible':
+        window[tab_keys[int(values['-IN-'])-1]].update(visible=True)
+    if event == 'Select':
+        window[tab_keys[int(values['-IN-'])-1]].select()
+
+window.close()

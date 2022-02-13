@@ -3,7 +3,7 @@ import os
 if os.path.exists("src/others/checker"):
     os.remove("src/others/checker")
 
-os.startfile("main.exe")
+os.startfile("main.py")
 
 import PySimpleGUI as sg
 

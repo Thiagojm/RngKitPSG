@@ -1,8 +1,8 @@
-# RngKit 2.0
+# RngKit 2.1.6
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
 thiagojm1984@hotmail.com  
-Written in Python 3.9.6
+Written in Python 3.10.2
 -----------------------
 
 # ABSTRACT
@@ -25,7 +25,7 @@ for data collection and statistical analysis for several purposes, including min
          Within this folder, right-click the TrueRNG.inf or TrueRNGpro.inf file and select Install. Follow the instructions for installation.  
     1.2- Bitbabbler:  
          Inside the 2-Installation\BitBabbler folder (inside the "C:\Users\Username\RngKit"), run vcredist_x64.exe (source: http://www.microsoft.com/en-us/download/details.aspx?id=30679) and follow the installation guidelines.
-         Insert your bitbabbler device into a USB port and run the zadig-2.4.exe file (source: http://zadig.akeo.ie/). Select your device and click "Install WCDI Driver".
+         Insert your bitbabbler device into a USB port and run the zadig-2.4.exe file (source: http://zadig.akeo.ie/). Select your device and click "Install Driver".
          Wait for the process to finish and close the program.
 
 # Usage

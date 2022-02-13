@@ -120,7 +120,7 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.1.5 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+    window = sg.Window("RngKit ver 2.1.6 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
                        resizable=True, icon=("src/images/BitB.ico"))
 
