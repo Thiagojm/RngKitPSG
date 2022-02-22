@@ -3,6 +3,7 @@ import time
 import threading
 import subprocess
 from time import localtime, strftime
+import secrets
 
 # External imports
 import PySimpleGUI as sg
@@ -46,7 +47,7 @@ Do not close this window!""")
     column_1 = [[sg.T("Choose RNG", size=(25, 1))], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
                 [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
                 [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")],
-                [sg.Radio('PseudoRNG', "radio_graph_1", k="pseudo_rng")]]
+                [sg.Radio('PseudoRNG', "radio_graph_1", k="pseudo_rng_ac")]]
 
     column_2 = [[sg.T("RAW(0)/XOR (1,2...):", size=(18, 1)),
                  sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(5, 1), k="ac_combo", enable_events=False,
@@ -149,6 +150,7 @@ Do not close this window!""")
             if not thread_cap:
                 if rm.test_bit_time_rate(values["ac_bit_count"], values["ac_time_count"]) and rm.check_usb_cap(values):
                     thread_cap = True
+                    print("oi")
                     threading.Thread(target=ac_data, args=(
                         values, window), daemon=True).start()
                     window['ac_button'].update("Stop")
@@ -227,6 +229,8 @@ def ac_data(values, window):
         threading.Thread(target=bit_cap, args=(
             values, window), daemon=True).start()
         trng3_cap(values, window)
+    elif values['pseudo_rng_ac']:
+        pseudo_cap(values, window)
 
 
 def bit_cap(values, window):
@@ -334,6 +338,43 @@ def trng3_cap(values, window):
         except Exception:
             pass
 
+
+def pseudo_cap(values, window):
+    global thread_cap
+    sample_value = int(values["ac_bit_count"])
+    interval_value = int(values["ac_time_count"])
+    blocksize = int(sample_value / 8)
+    file_name = time.strftime(
+        f"%Y%m%d-%H%M%S_pseudo_s{sample_value}_i{interval_value}")
+    file_name = f"1-SavedFiles/{file_name}"
+    while thread_cap:
+        start_cap = time.time()
+        with open(file_name + '.bin', "ab") as bin_file:  # save binary file
+            try:
+                x = secrets.token_bytes(blocksize)  # read bytes from serial port
+            except Exception:
+                rm.popupmsg("Warning!", "Read failed!")
+                thread_cap = False
+                window['ac_button'].update("Start")
+                window["stat_ac"].update("        Idle", text_color="orange")
+                window['live_plot'].update("Start")
+                window["stat_live"].update("        Idle", text_color="orange")
+                break
+            bin_file.write(x)
+        bin_hex = BitArray(x)  # bin to hex
+        bin_ascii = bin_hex.bin  # hex to ASCII
+        # count numbers of ones in the string
+        num_ones_array = bin_ascii.count('1')
+        # open file and append time and number of ones
+        with open(file_name + '.csv', "a+") as write_file:
+            write_file.write(
+                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        end_cap = time.time()
+        # print(interval_value - (end_cap - start_cap))
+        try:
+            time.sleep(interval_value - (end_cap - start_cap))
+        except Exception:
+            pass
 
 # ----------------Live Plot Functions------------
 

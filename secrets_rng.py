@@ -2,7 +2,7 @@ import secrets
 
 
 bit_size = 250
-bits = secrets.randbits(bit_size)
+bits = secrets.token_bytes(bit_size)
 
 print(bits)
 bin_ascii = bin(bits)[2:].zfill(bit_size)

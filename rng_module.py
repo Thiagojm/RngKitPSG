@@ -79,7 +79,8 @@ def check_usb_cap(values):
         else:
             popupmsg("Error", "Check if the the selected devices are attached.")
             return False
-
+    elif values['pseudo_rng_ac']:
+        return True
 
 def check_usb_live(values):
     if values['bit_live']:
