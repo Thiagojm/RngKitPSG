@@ -210,13 +210,13 @@ def create_chart(workbook, data_file2, an_bit_count, an_time_count):
 
 def test_bit_time_rate(bit_count, time_count):
     try:
-        if int(bit_count) > 0 and (int(bit_count) % 2) == 0:
+        if int(bit_count) > 0 and (int(bit_count) % 8) == 0:
             pass
         else:
-            popupmsg("Error", "Check if the number is an even number, an integer, greater then 0 and try again.")
+            popupmsg("Error", "Check if the number is divisible by 8, an integer, greater then 0 and try again.")
             return False
     except Exception:
-        popupmsg("Error", "Check if the number is an even number, an integer, greater then 0 and try again.")
+        popupmsg("Error", "Check if the number is divisible by 8, an integer, greater then 0 and try again.")
         return False
     try:
         if int(time_count) >= 1:
