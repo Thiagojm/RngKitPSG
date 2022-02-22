@@ -1,7 +1,7 @@
 import secrets
 
 
-bit_size = 2048
+bit_size = 250
 bits = secrets.randbits(bit_size)
 
 print(bits)

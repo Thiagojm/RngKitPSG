@@ -45,7 +45,8 @@ Do not close this window!""")
 
     column_1 = [[sg.T("Choose RNG", size=(25, 1))], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
                 [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
-                [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")]]
+                [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")],
+                [sg.Radio('PseudoRNG', "radio_graph_1", k="pseudo_rng")]]
 
     column_2 = [[sg.T("RAW(0)/XOR (1,2...):", size=(18, 1)),
                  sg.InputCombo((0, 1, 2, 3, 4), default_value=0, size=(5, 1), k="ac_combo", enable_events=False,
@@ -61,8 +62,7 @@ Do not close this window!""")
 
     acquiring_data = [[sg.T(" ")],
                       [sg.Column(column_1), sg.Column(column_2), sg.Column(
-                          column_3, element_justification="center")],
-                      [sg.T(" ")]]
+                          column_3, element_justification="center")]]
 
     data_analysis = [[sg.T(" ")], [sg.T(" ", size=(8, 1)), sg.T("Sample Size (bits):", size=(18, 1)),
                                    sg.Input("2048", k="an_bit_count", size=(
@@ -85,10 +85,10 @@ Do not close this window!""")
         [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
 
     # TAB 2 - Gráfico
-    column_graph_1 = [[sg.T("Choose RNG", size=(22, 1))],
-                      [sg.Radio('BitBabbler', "radio_graph",
+    column_graph_1 = [[sg.Radio('BitBabbler', "radio_graph",
                                 k="bit_live", default=True)],
-                      [sg.Radio('TrueRNG3', "radio_graph", k="true3_live")]]
+                      [sg.Radio('TrueRNG3', "radio_graph", k="true3_live")],
+                      [sg.Radio('PseudoRNG', "radio_graph", k="pseudo_rng_live")]]
 
     column_graph_2 = [[sg.T("RAW(0)/XOR (1,2):", size=(16, 1)),
                        sg.InputCombo((0, 1), default_value=0, size=(5, 1), k="live_combo", enable_events=False,
