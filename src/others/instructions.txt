@@ -1,7 +1,7 @@
-# RngKit 2.1.7
+# RngKit 2.2
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
-tjm.plastica@gmail.com   
+thiagojm1984@hotmail.com  
 Written in Python 3.10.2
 -----------------------
 
@@ -22,7 +22,7 @@ Afterwards, the data can be analyzed and compared with the number expected by ch
 # Installation
 
 If you trust, the latest Windows installer (compiled with pyinstaller and packed with NSIS Software) can be downloaded here:  
-> RngKit 2.1.6 - https://mega.nz/file/VygCULaK#sqS0-9VhSkTPjqQJNTmYCm5v6ZqenGyaZMx08cLqjFM
+> RngKit 2.2 - https://mega.nz/file/wyhFGCKR#VQVifODwzzmGLAFMT_1OfFkb4gR3I9nHCB9za6BQO4w
 
 1- Hardware Installation:
     The default installation path is: "C:\Users\Username\RngKit" - Where Username is the name of the windows current user.  
