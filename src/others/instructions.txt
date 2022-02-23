@@ -7,8 +7,10 @@ Written in Python 3.10.2
 
 # ABSTRACT
 
-This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler)
-for data collection and statistical analysis for several purposes, including mind-matter interaction research.
+This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) and a Pseudo RNG (based on python secrets module)
+for data collection and statistical analysis for several purposes, including mind-matter interaction research.  
+It uses random number generation to collect and count the number of times the '1' bit appears in a series of user-defined size and interval.
+Afterwards, the data can be analyzed and compared with the number expected by chance (50%) and create a chart with a cumulative Z-Score.
 
 
 # Supported Hardware:
@@ -40,14 +42,15 @@ If you trust, the latest Windows installer (compiled with pyinstaller and packed
 >### Collecting:  
 >>To collect data, select the device to use, or multiple devices and click "Start". You can set the sample size (in bits) and the sample interval (in seconds). 
 BitBabbler has different capturing options (number of folds), with option 0 being in RAW, options between 1 and 4 in XOR, TrueRNG only works in XOR mode.
-PseudoRNG uses the python secrets module that gathers entropy from you system, it´s probably not a good source of randomness, but you can use if you don´t have a hardware RNG. 
+PseudoRNG uses the python secrets module that gathers entropy from your system, it´s probably not a good source of randomness, but you can use if you don´t have a hardware RNG. 
 Hit "Stop" when you wish to stop the process. Two files are going to be created inside the "1-SavedFiles" folder. One with .bin extension and another with .csv.
-The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series, usually will be better to analyse the .csv file.   
+The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series and the count of 'ones' that appeared in each series. Usually will be better to analyse the .csv file.   
 
 >### Analysing:  
 >>To analyse the file and generate a Excel file with z-score and a graph, select a previously generated .bin or .csv file whit the "Browse" button.
-Also, be sure the select the correct value for the sample size and sample interval, or you will get wrong result.
+Also, be sure the select the correct value for the sample size and sample interval, or you will get wrong results.
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
+This data and chart represent the cumulative z-score of 'ones' that appeared in the samples.
 This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.  
 
 >### Concatenate:  
