@@ -106,7 +106,8 @@ def check_usb_live(values):
         else:
             popupmsg("Error", "Check if the the selected device is attached.")
             return False
-
+    elif values['pseudo_rng_live']:
+        return True
 
 # ----------------- Analyse Data --------------------------
 def file_to_excel(data_file, an_bit_count, an_time_count):

@@ -1,4 +1,4 @@
-# RngKit 2.1.6
+# RngKit 2.1.7
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
 tjm.plastica@gmail.com 
@@ -36,6 +36,7 @@ for data collection and statistical analysis for several purposes, including min
 > Collecting:
 To collect data, select the device to use, or multiple devices and click "Start". You can set the sample size (in bits) and the sample interval (in seconds). 
 BitBabbler has different capturing options (number of folds), with option 0 being in RAW, options between 1 and 4 in XOR, TrueRNG only works in XOR mode.
+PseudoRNG uses the python secrets module that gathers entropy from you system, it´s probably not a good source of randomness, but you can use if you don´t have a hardware RNG. 
 Hit "Stop" when you wish to stop the process. Two files are going to be created inside the "1-SavedFiles" folder. One with .bin extension and another with .csv.
 The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series, usually will be better to analyse the .csv file.  
 > Analysing:
@@ -62,4 +63,3 @@ For example "20201011-142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (2
 MIT License
 
 Copyright (c) 2022 Thiago Jung Mendaçolli
-
