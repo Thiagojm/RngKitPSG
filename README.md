@@ -1,7 +1,7 @@
 # RngKit 2.1.7
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
-tjm.plastica@gmail.com 
+tjm.plastica@gmail.com   
 Written in Python 3.10.2
 -----------------------
 
@@ -14,7 +14,8 @@ for data collection and statistical analysis for several purposes, including min
 # Supported Hardware:
 
 1- TrueRNG and TrueRNGPro (https://ubld.it/);  
-2- Bitbabbler Black and White (http://www.bitbabbler.org/what.html).
+2- Bitbabbler Black and White (http://www.bitbabbler.org/what.html);  
+3- No Hardware: Pseudo RNG (using Python Secrets Module).
 
 # Installation
 
