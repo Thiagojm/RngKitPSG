@@ -19,6 +19,9 @@ for data collection and statistical analysis for several purposes, including min
 
 # Installation
 
+If you trust, the latest Windows installer (compiled with pyinstaller and packed with NSIS Software) can be downloaded here:  
+> RngKit 2.1.6 - https://mega.nz/file/VygCULaK#sqS0-9VhSkTPjqQJNTmYCm5v6ZqenGyaZMx08cLqjFM
+
 1- Hardware Installation:
     The default installation path is: "C:\Users\Username\RngKit" - Where Username is the name of the windows current user.  
     1.1- TrueRNG e TrueRNGPro:  
