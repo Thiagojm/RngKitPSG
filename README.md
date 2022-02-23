@@ -76,9 +76,9 @@ Copyright (c) 2022 Thiago Jung Mendaçolli
 
 # ScreenShots
 
-![image](https://user-images.githubusercontent.com/30575561/99856631-24449680-2b68-11eb-9d12-2537df1ddb6a.png)
+![image](https://user-images.githubusercontent.com/30575561/155261747-127a3949-f308-4731-b550-ae879e121c81.png)
 
-![image](https://user-images.githubusercontent.com/30575561/99856669-3aeaed80-2b68-11eb-85e5-5df83d0e19a3.png)
+![image](https://user-images.githubusercontent.com/30575561/155261890-1ce7c9c0-4dfe-4bf9-b400-b7b42a21f7c0.png)
 
-![image](https://user-images.githubusercontent.com/30575561/99856685-45a58280-2b68-11eb-9a5b-a7f71be7dd32.png)
+![image](https://user-images.githubusercontent.com/30575561/155261833-8f784f86-f99d-40c7-a979-a33e59d7f683.png)
 
