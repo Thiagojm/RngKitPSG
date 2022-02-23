@@ -62,7 +62,7 @@ When you finish capturing it is important to click "Stop".
 
 3- File naming:  
 The file name contains important information about the collected data.
-The first part is the date and time of the collection, then the device used (trng for TrueRN or bitb for Bitbabbler), the number of bits per sample, the time between each sample in seconds and finally, only on Bitbabbler devices, whether in RAW or in XOR (number of folds).
+The first part is the date and time of the collection, then the device used (trng for TrueRN, bitb for Bitbabbler and pseudo for PseudoRNG), the number of bits per sample, the time between each sample in seconds and finally, only on Bitbabbler devices, whether in RAW or in XOR (number of folds).
 For example "20201011-142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (20201011), at 14:22:08 (142208), Bitbbabler device (bitb), sample of 2048 bits (s2048) every 1 second (i1), RAW mode (f0).
 
 # License
