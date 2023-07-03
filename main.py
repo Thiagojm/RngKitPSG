@@ -27,6 +27,7 @@ global zscore_array
 zscore_array = []
 global values
 values = None
+rm.kill_seedd()
 
 
 def main():
@@ -377,10 +378,13 @@ def pseudo_cap(values, window):
 
 # ----------------Live Plot Functions------------
 
-# TODO: use secrets to make new capturing function
 
 def live_plot(values, window):
     if values['bit_live']:
+        command = f"src\\bin\\seedd --no-qa -f{values['live_combo']} --udp-out 127.0.0.1:1200"
+        seedd_process = rm.start_seedd(command)
+        time.sleep(int(values['live_combo'])) if int(
+            values['live_combo']) != 0 else time.sleep(1)
         livebblaWin(values, window)
     elif values['true3_live']:
         trng3live(values, window)
@@ -448,9 +452,10 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     thread_cap = True
     xor_value = values['live_combo']
     sample_value = int(values["live_bit_count"])
+    sample_bytes = int(sample_value / 8)
     interval_value = int(values["live_time_count"])
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    addr, port, max_msg_size = '127.0.0.1', 1200, 32768
+    
     file_name = time.strftime(
         f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
@@ -462,15 +467,13 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         start_cap = time.time()
         index_number += 1
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.Popen(
-                f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
-                stdout=subprocess.PIPE, startupinfo=startupinfo)
-            chunk = proc.stdout.read()
+            chunk = rm.read_from_deamon(addr, port, sample_bytes, max_msg_size)
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
         if not bin_ascii:
             thread_cap = False
+            rm.kill_seedd()
             sg.popup_non_blocking('WARNING !!!',
                                   "Something went wrong, is the device attached? Attach it and try again!!!",
                                   keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
@@ -499,7 +502,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
-
+    rm.kill_seedd()
 
 def trng3live(values, window):
     global thread_cap
