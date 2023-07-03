@@ -8,3 +8,4 @@ venv/
 .venv/
 .idea/
 .vscode/
+tests/__pycache__
