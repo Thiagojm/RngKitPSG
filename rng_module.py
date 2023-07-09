@@ -40,12 +40,12 @@ def read_from_deamon(addr, port, bytes_requested, max_msg_size):
         sys.exit(1)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
+    
     # Send the requested number of bytes as a network-order short.
     msg = bytes([bytes_requested >> 8, bytes_requested & 0xFF])
 
     sock.sendto(msg, (addr, port))
-
+    
     data, _ = sock.recvfrom(max_msg_size)
     return data 
 
