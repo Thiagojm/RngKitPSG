@@ -134,7 +134,7 @@ Do not close this window!""")
     canvas = FigureCanvasTkAgg(f, canvas)
     canvas.draw()
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
-    ani = animation.FuncAnimation(f, animate, interval=1000)
+    ani = animation.FuncAnimation(f, animate, interval=1000, cache_frame_data=False)
 
     # Creating checker for the splashscreen
     open("src/others/checker", mode='w').close()

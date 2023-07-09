@@ -148,7 +148,7 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
             chart.add_series(
                 {'values': ['Z-Test', 1, 5, number_rows, 5], 'categories': ['Z-Test', 1, 1, number_rows, 1]})
             worksheet.insert_chart('G2', chart)
-            writer.save()
+            writer.close()
             popupmsg('File Saved', 'Saved as ' + file_to_save)
             return
         elif data_file[-3:] == "bin":
@@ -172,15 +172,15 @@ def file_to_excel(data_file, an_bit_count, an_time_count):
             chart.add_series(
                 {'values': ['Z-Test', 1, 4, number_rows, 4], 'categories': ['Z-Test', 1, 0, number_rows, 0]})
             worksheet.insert_chart('G2', chart)
-            writer.save()
+            writer.close()
             popupmsg('File Saved', 'Saved as ' + file_to_save)
             return
         else:
             popupmsg("Warning", 'Wrong File Type, Select a .bin or .csv file')
             pass
-    except Exception:
+    except Exception as e:
         popupmsg("Error",
-                 'Something went wrong, please check the parameters and try again. Is the target file already open?')
+                 f'Something went wrong, please check the parameters and try again. Is the target file already open?, {e}')
 
 
 def binary_data(num_ones_array, an_bit_count):
