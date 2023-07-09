@@ -1,7 +1,6 @@
 # Default imports
 import time
 import threading
-import subprocess
 from time import localtime, strftime
 import secrets
 
@@ -121,7 +120,7 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.2 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+    window = sg.Window("RngKit ver 2.3 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
                        resizable=True, icon=("src/images/BitB.ico"))
 
@@ -221,10 +220,18 @@ def animate(i):
 # ---------------- Acquire Data Functions -------
 def ac_data(values, window):
     if values["bit_ac"]:
+        command = f"src\\bin\\seedd --no-qa -f{values['ac_combo']} --udp-out 127.0.0.1:1200"
+        seedd_process = rm.start_seedd(command)
+        time.sleep(int(values['ac_combo'])) if int(
+            values['ac_combo']) != 0 else time.sleep(1)
         bit_cap(values, window)
     elif values['true3_ac']:
         trng3_cap(values, window)
     elif values["true3_bit_ac"]:
+        command = f"src\\bin\\seedd --no-qa -f{values['ac_combo']} --udp-out 127.0.0.1:1200"
+        seedd_process = rm.start_seedd(command)
+        time.sleep(int(values['ac_combo'])) if int(
+            values['ac_combo']) != 0 else time.sleep(1)
         threading.Thread(target=bit_cap, args=(
             values, window), daemon=True).start()
         trng3_cap(values, window)
@@ -235,25 +242,23 @@ def ac_data(values, window):
 def bit_cap(values, window):
     xor_value = values["ac_combo"]
     sample_value = int(values["ac_bit_count"])
+    sample_bytes = int(sample_value / 8)
     interval_value = int(values["ac_time_count"])
+    addr, port, max_msg_size = '127.0.0.1', 1200, 32768
     global thread_cap
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     file_name = time.strftime(
         f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
         with open(file_name + '.bin', "ab+") as bin_file:  # save binary file
-            proc = subprocess.Popen(
-                f"src/bin/seedd.exe --limit-max-xfer --no-qa -f{xor_value} -b {int(sample_value / 8)}",
-                stdout=subprocess.PIPE, startupinfo=startupinfo)
-            chunk = proc.stdout.read()
+            chunk = rm.read_from_deamon(addr, port, sample_bytes, max_msg_size)
             bin_file.write(chunk)
         bin_hex = BitArray(chunk)  # bin to hex
         bin_ascii = bin_hex.bin  # hex to ASCII
         if not bin_ascii:
             thread_cap = False
+            rm.kill_seedd()
             sg.popup_non_blocking('WARNING !!!',
                                   "Something went wrong, is the device attached? Attach it and try again!!!",
                                   keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
@@ -275,7 +280,8 @@ def bit_cap(values, window):
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
-
+    rm.kill_seedd()
+    
 
 def trng3_cap(values, window):
     global thread_cap

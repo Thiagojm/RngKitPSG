@@ -1,8 +1,8 @@
-# RngKit 2.2
+# RngKit 2.3
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
-thiagojm1984@hotmail.com  
-Written in Python 3.10.2
+thiagojm1984@hotmail.com   
+Written in Python 3.11.4
 -----------------------
 
 # ABSTRACT
@@ -21,9 +21,6 @@ Afterwards, the data can be analyzed and compared with the number expected by ch
 
 # Installation
 
-If you trust, the latest Windows installer (compiled with pyinstaller and packed with NSIS Software) can be downloaded here:  
-> RngKit 2.2 - https://mega.nz/file/wyhFGCKR#VQVifODwzzmGLAFMT_1OfFkb4gR3I9nHCB9za6BQO4w
-
 1- Hardware Installation:
     The default installation path is: "C:\Users\Username\RngKit" - Where Username is the name of the windows current user.  
     1.1- TrueRNG e TrueRNGPro:  
@@ -31,7 +28,7 @@ If you trust, the latest Windows installer (compiled with pyinstaller and packed
          Within this folder, right-click the TrueRNG.inf or TrueRNGpro.inf file and select Install. Follow the instructions for installation.  
     1.2- Bitbabbler:  
          Inside the 2-Installation\BitBabbler folder (inside the "C:\Users\Username\RngKit"), run vcredist_x64.exe (source: http://www.microsoft.com/en-us/download/details.aspx?id=30679) and follow the installation guidelines.
-         Insert your bitbabbler device into a USB port and run the zadig-2.4.exe file (source: http://zadig.akeo.ie/). Select your device and click "Install Driver".
+         Insert your bitbabbler device into a USB port and run the zadig-2.8.exe file (source: http://zadig.akeo.ie/). Select your device and click "Install Driver".
          Wait for the process to finish and close the program.
 
 # Usage
@@ -63,7 +60,7 @@ When you finish capturing it is important to click "Stop".
 
 - ## TAB 3: Instructions Tab
 
-3- File naming:  
+3- File naming convention:  
 The file name contains important information about the collected data.
 The first part is the date and time of the collection, then the device used (trng for TrueRN, bitb for Bitbabbler and pseudo for PseudoRNG), the number of bits per sample, the time between each sample in seconds and finally, only on Bitbabbler devices, whether in RAW or in XOR (number of folds).
 For example "20201011-142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (20201011), at 14:22:08 (142208), Bitbbabler device (bitb), sample of 2048 bits (s2048) every 1 second (i1), RAW mode (f0).
@@ -72,4 +69,13 @@ For example "20201011-142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (2
 
 MIT License
 
-Copyright (c) 2022 Thiago Jung Mendaçolli
+Copyright (c) 2023 Thiago Jung Mendaçolli
+
+# ScreenShots
+
+![image](https://user-images.githubusercontent.com/30575561/155261747-127a3949-f308-4731-b550-ae879e121c81.png)
+
+![image](https://user-images.githubusercontent.com/30575561/155261890-1ce7c9c0-4dfe-4bf9-b400-b7b42a21f7c0.png)
+
+![image](https://user-images.githubusercontent.com/30575561/155261833-8f784f86-f99d-40c7-a979-a33e59d7f683.png)
+
