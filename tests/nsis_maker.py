@@ -9,12 +9,12 @@ appname = "RngKit"
 compname = "Conscienciology"
 descript = "This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) for data collection and statistical analysis for several purposes, including mind-matter interaction research."
 vmajor = 2
-vminor = 2
+vminor = 3
 vbuild = 0
 helpurl = ""
 updateurl = ""
 abouturl = ""
-installsize = 126533
+installsize = 132505
 iconpath = "src/images/BitB.ico"
 builder = "py"
 
