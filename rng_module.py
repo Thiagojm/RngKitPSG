@@ -1,7 +1,6 @@
 # Default imports
 import re
-import os, sys
-import socket
+import os
 import subprocess
 from contextlib import ExitStack
 import time
@@ -12,43 +11,6 @@ import PySimpleGUI as sg
 from bitstring import BitArray
 from serial.tools import list_ports
 import xlsxwriter
-import psutil
-
-
-def kill_seedd():
-    # Get a list of all running processes
-    all_processes = psutil.process_iter()
-
-
-    # Iterate over the running processes and find the process named 'seedd.exe'
-    for process in all_processes:
-        if process.name() == 'seedd.exe':
-            # Terminate the process
-            process.terminate()
-            print(f"Process {process.name()} ({process.pid}) has been terminated.")
-            break  # Exit the loop once the process is found and terminated
-
-def start_seedd(command):
-    process = subprocess.Popen(command, shell=True)
-
-def read_from_deamon(addr, port, bytes_requested, max_msg_size):
-    if bytes_requested < 1:
-        print("Not reading 0 bytes")
-        sys.exit(1)
-    elif bytes_requested > max_msg_size:
-        print("Maximum request is", max_msg_size)
-        sys.exit(1)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    
-    # Send the requested number of bytes as a network-order short.
-    msg = bytes([bytes_requested >> 8, bytes_requested & 0xFF])
-
-    sock.sendto(msg, (addr, port))
-    
-    data, _ = sock.recvfrom(max_msg_size)
-    return data 
-
 
 def popupmsg(msg_title, msg):
     sg.popup_non_blocking(msg_title, msg, keep_on_top=True, no_titlebar=False, grab_anywhere=True, font="Calibri, 18",
