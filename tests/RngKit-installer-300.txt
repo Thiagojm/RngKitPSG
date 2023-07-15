@@ -20,7 +20,7 @@
 !define UPDATEURL "" # "Product Updates" link
 !define ABOUTURL "" # "Publisher" link
 # This is the size (in kB) of all the files copied into "Program Files"
-!define INSTALLSIZE 141225
+!define INSTALLSIZE 83764
 
 RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
 

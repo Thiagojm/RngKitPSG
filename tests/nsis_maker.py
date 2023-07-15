@@ -14,7 +14,7 @@ vbuild = 0
 helpurl = ""
 updateurl = ""
 abouturl = ""
-installsize = 141225
+installsize = 83764
 iconpath = "src/images/BitB.ico"
 builder = "py"
 
