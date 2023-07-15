@@ -33,7 +33,7 @@ def main():
 Wait for the application to load!
 Do not close this window!""")
 
-    with open("src/others/instructions.txt", "r", encoding="utf8") as f:
+    with open("README.md", "r", encoding="utf8") as f:
         instruction_text = f.read()
 
     # THEME
