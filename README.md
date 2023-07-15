@@ -79,9 +79,8 @@ Copyright (c) 2023 Thiago Jung Mendaçolli
 
 # ScreenShots
 
-![image](https://user-images.githubusercontent.com/30575561/155261747-127a3949-f308-4731-b550-ae879e121c81.png)
+![image](src\images\RngKit_1.jpg)
 
-![image](https://user-images.githubusercontent.com/30575561/155261890-1ce7c9c0-4dfe-4bf9-b400-b7b42a21f7c0.png)
+![image](src\images\RngKit_2.jpg)
 
-![image](https://user-images.githubusercontent.com/30575561/155261833-8f784f86-f99d-40c7-a979-a33e59d7f683.png)
 

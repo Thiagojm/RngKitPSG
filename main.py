@@ -39,7 +39,7 @@ Do not close this window!""")
 
     # THEME
     # Good Ones: DarkBlue14, Dark, DarkBlue, DarkBlue3, DarkTeal1, DarkTeal10, DarkTeal9, LightGreen
-    sg.theme('LightGreen')
+    sg.theme('Dark')
 
     # TAB 1 - Collect / Analyse
 
