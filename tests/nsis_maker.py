@@ -8,13 +8,13 @@ class MyTemplate(Template):
 appname = "RngKit"
 compname = "Conscienciology"
 descript = "This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) for data collection and statistical analysis for several purposes, including mind-matter interaction research."
-vmajor = 2
-vminor = 3
+vmajor = 3
+vminor = 0
 vbuild = 0
 helpurl = ""
 updateurl = ""
 abouturl = ""
-installsize = 132505
+installsize = 141225
 iconpath = "src/images/BitB.ico"
 builder = "py"
 

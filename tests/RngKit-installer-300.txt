@@ -11,16 +11,16 @@
 !define COMPANYNAME "Conscienciology"
 !define DESCRIPTION "This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) for data collection and statistical analysis for several purposes, including mind-matter interaction research."
 # These three must be integers
-!define VERSIONMAJOR 2
-!define VERSIONMINOR 1
-!define VERSIONBUILD 6
+!define VERSIONMAJOR 3
+!define VERSIONMINOR 0
+!define VERSIONBUILD 0
 # These will be displayed by the "Click here for support information" link in "Add/Remove Programs"
 # It is possible to use "mailto:" links in here to open the email client
 !define HELPURL "" # "Support Information" link
 !define UPDATEURL "" # "Product Updates" link
 !define ABOUTURL "" # "Publisher" link
 # This is the size (in kB) of all the files copied into "Program Files"
-!define INSTALLSIZE 123669
+!define INSTALLSIZE 141225
 
 RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
 
@@ -31,7 +31,7 @@ LicenseData "LICENSE.txt"
 # This will be in the installer/uninstaller's title bar
 Name "${COMPANYNAME} - ${APPNAME}"
 Icon "src/images/BitB.ico"
-outFile "RngKit-installer-216-py.exe"
+outFile "RngKit-installer-300-py.exe"
 
 !include LogicLib.nsh
 
