@@ -1,17 +1,26 @@
 import pandas as pd
 import numpy as np
-from scipy.stats import norm
-import os
+import os, re
 import xlsxwriter
-from datetime import datetime
 from bitstring import BitArray
 
 # Constants
-SHEET_NAME = 'Sheet1'
+SHEET_NAME = 'Zscore'
 ONES_COLUMN = 'ones'
-BLOCK_COLUMN = 'block'
-TIMESTAMP_COLUMN = 'timestamp'
-OUTPUT_FILENAME = 'output.xlsx'
+BLOCK_COLUMN = 'samples'
+TIMESTAMP_COLUMN = 'time'
+
+# This function finds the interval in seconds from the filename.
+def find_interval(file_path):
+    match_i = re.search(r"_i(\d+).", file_path)
+    interval = int(match_i.group(1))
+    return interval
+
+# This function finds the bit count from the filename.
+def find_bit_count(file_path):
+    match = re.search(r"_s(\d+)_i", file_path)
+    bit_count = int(match.group(1))
+    return bit_count
 
 # This function reads a .bin file and returns a DataFrame with block number and number of ones.
 def read_bin_file(file_path, block_size):
@@ -43,8 +52,9 @@ def calculate_z_test(dataframe, block_size):
     return dataframe
 
 # This function writes the DataFrame to an Excel file, and adds a line chart to visualize the Z-test value.
-def write_to_excel(dataframe, file_path, block_size):
-    writer = pd.ExcelWriter(OUTPUT_FILENAME, engine='xlsxwriter')
+def write_to_excel(dataframe, file_path, block_size, interval):
+    file_to_save = os.path.splitext(file_path)[0]+'.xlsx'
+    writer = pd.ExcelWriter(file_to_save, engine='xlsxwriter')
     dataframe.to_excel(writer, sheet_name=SHEET_NAME, index=False)
 
     workbook = writer.book
@@ -58,8 +68,10 @@ def write_to_excel(dataframe, file_path, block_size):
     })
 
     chart.set_title({'name': os.path.basename(file_path)})
-    chart.set_x_axis({'name': 'Interval (seconds)', 'date_axis': True})
-    chart.set_y_axis({'name': f'Sample Size (block size: {block_size} bits)'})
+    chart.set_x_axis({'name': f'Number of Samples - one sample ervery {interval} second(s)', 'date_axis': True})
+    chart.set_y_axis({'name': f'Z-Score - Sample Size =  {block_size} bits)'})
+    
+    chart.set_legend({'none': True})
 
     worksheet.insert_chart('F2', chart)
 
@@ -68,17 +80,19 @@ def write_to_excel(dataframe, file_path, block_size):
 # The main function prompts the user to enter file path and block size, then processes the file accordingly.
 def main():
     file_path = input("Enter the path to the file: ")
-    block_size = int(input("Enter the block size in bits: "))
-
+    interval = find_interval(file_path)
+    block_size = find_bit_count(file_path)
     if file_path.endswith(".bin"):
         df = read_bin_file(file_path, block_size)
     elif file_path.endswith(".csv"):
         df = read_csv_file(file_path)
     else:
         raise ValueError("Unsupported file type")
-
+    
     df = calculate_z_test(df, block_size)
-    write_to_excel(df, file_path, block_size)
+    write_to_excel(df, file_path, block_size, interval)
+    
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     main()
+    
