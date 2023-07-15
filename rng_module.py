@@ -1,4 +1,6 @@
 # Default imports
+import csv
+from datetime import datetime
 import re
 import os, sys
 import socket
@@ -13,6 +15,21 @@ from bitstring import BitArray
 from serial.tools import list_ports
 import xlsxwriter
 import psutil
+import numpy as np
+
+
+def write_to_csv(count, filename):
+    now = datetime.now()
+
+    # Format datetime to look like "2023-07-12T16:35:12"
+    formatted_now = now.strftime("%Y%m%dT%H:%M:%S")
+
+    # Open the CSV file in append mode
+    with open(os.path.join(filename + '.csv'), 'a', newline='') as file:
+        writer = csv.writer(file)
+
+        # Write the current datetime and the count of ones
+        writer.writerow([formatted_now, count])
 
 
 def kill_seedd():
@@ -125,104 +142,96 @@ def check_usb_live(values):
         return True
 
 # ----------------- Analyse Data --------------------------
-def file_to_excel(data_file, an_bit_count, an_time_count):
+
+# This function finds the interval in seconds from the filename.
+def find_interval(file_path):
+    match_i = re.search(r"_i(\d+).", file_path)
+    interval = int(match_i.group(1))
+    return interval
+
+# This function finds the bit count from the filename.
+def find_bit_count(file_path):
+    match = re.search(r"_s(\d+)_i", file_path)
+    bit_count = int(match.group(1))
+    return bit_count
+
+# This function reads a .csv file and returns a DataFrame with timestamp and number of ones.
+def read_csv_file(file_path):
+    df = pd.read_csv(file_path, header=None, names=['time', 'ones'])
+    df['time'] = pd.to_datetime(df['time']).apply(lambda x: x.strftime('%H:%M:%S'))
+    return df
+
+# This function reads a .bin file and returns a DataFrame with block number and number of ones.
+def read_bin_file(file_path, block_size):
+    data_list = []
+    with open(file_path, 'rb') as binary_file:
+        block = 1
+        while True:
+            data = binary_file.read(block_size // 8)
+            if len(data) == 0:
+                break
+            bit_arr = BitArray(data)
+            ones = bit_arr.count(1)
+            data_list.append([block, ones])
+            block += 1
+    return pd.DataFrame(data_list, columns=['samples', 'ones'])
+
+# This function calculates the cumulative mean and Z-test value and adds them as new columns to the DataFrame.
+def calculate_z_test(dataframe, block_size):
+    expected_mean = 0.5 * block_size
+    expected_std_dev = np.sqrt(block_size * 0.5 * 0.5)
+    dataframe['cumulative_mean'] = dataframe['ones'].expanding().mean()
+    dataframe['z_test'] = (dataframe['cumulative_mean'] - expected_mean) / (expected_std_dev / np.sqrt(dataframe.index + 1))
+    return dataframe
+
+# This function writes the DataFrame to an Excel file, and adds a line chart to visualize the Z-test value.
+def write_to_excel(dataframe, file_path, block_size, interval):
+    file_to_save = os.path.splitext(file_path)[0]+'.xlsx'
+    writer = pd.ExcelWriter(file_to_save, engine='xlsxwriter')
+    dataframe.to_excel(writer, sheet_name='Zscore', index=False)
+
+    workbook = writer.book
+    worksheet = writer.sheets['Zscore']
+
+    chart = workbook.add_chart({'type': 'line'})
+
+    chart.add_series({
+        'categories': ['Zscore', 1, 0, len(dataframe), 0],
+        'values':     ['Zscore', 1, 3, len(dataframe), 3],
+    })
+
+    chart.set_title({'name': os.path.basename(file_path)})
+    chart.set_x_axis({'name': f'Number of Samples - one sample ervery {interval} second(s)', 'date_axis': True})
+    chart.set_y_axis({'name': f'Z-Score - Sample Size =  {block_size} bits)'})
+    
+    chart.set_legend({'none': True})
+
+    worksheet.insert_chart('F2', chart)
+
+    writer.close()
+
+
+# This function reads a .csv or .bin file do calculations and save to a .xlsx file.
+def file_to_excel(file_path):
     try:
         sg.PopupQuickMessage("Working, please wait... this could take a few seconds.", background_color="Grey",
                              font="Calibri, 18", auto_close_duration=1)
-        an_bit_count = int(an_bit_count)
-        an_time_count = int(an_time_count)
-        if data_file == "":
+        # an_bit_count = int(an_bit_count)
+        # an_time_count = int(an_time_count)
+        interval = find_interval(file_path)
+        block_size = find_bit_count(file_path)
+        if file_path == "":
             popupmsg('Atention', 'Select a file first')
-            pass
-        elif data_file[-3:] == "csv":
-            ztest = ztest_pandas(data_file, an_bit_count)
-            data_file2 = os.path.basename(data_file)
-            data_file2 = data_file2.replace(".csv", "")
-            file_to_save = data_file.replace(".csv", ".xlsx")
-            number_rows = len(ztest.index)
-            writer = pd.ExcelWriter(file_to_save, engine='xlsxwriter')
-            ztest.to_excel(writer, sheet_name='Z-Test', index=False)
-            workbook = writer.book
-            worksheet = writer.sheets['Z-Test']
-            chart = create_chart(workbook, data_file2, an_bit_count, an_time_count)
-            chart.add_series(
-                {'values': ['Z-Test', 1, 5, number_rows, 5], 'categories': ['Z-Test', 1, 1, number_rows, 1]})
-            worksheet.insert_chart('G2', chart)
-            writer.close()
-            popupmsg('File Saved', 'Saved as ' + file_to_save)
             return
-        elif data_file[-3:] == "bin":
-            sg.PopupQuickMessage("Working, please wait... this could take a few seconds.", background_color="Grey",
-                                 font="Calibri, 18", auto_close_duration=2)
-            with open(data_file, "rb") as file:  # open binary file
-                bin_hex = BitArray(file)  # bin to hex
-            bin_ascii = bin_hex.bin
-            split_bin_ascii = re.findall("." * an_bit_count, bin_ascii)  # Waaaaay faster then wrap and map zip
-            num_ones_array = list(map(lambda x: x.count("1"), split_bin_ascii))
-            binSheet = binary_data(num_ones_array, an_bit_count)
-            data_file2 = os.path.basename(data_file)
-            data_file2 = data_file2.replace(".bin", "")
-            file_to_save = data_file.replace(".bin", ".xlsx")
-            number_rows = len(binSheet.Sample)
-            writer = pd.ExcelWriter(file_to_save, engine='xlsxwriter')
-            binSheet.to_excel(writer, sheet_name='Z-Test', index=False)
-            workbook = writer.book
-            worksheet = writer.sheets['Z-Test']
-            chart = create_chart(workbook, data_file2, an_bit_count, an_time_count)
-            chart.add_series(
-                {'values': ['Z-Test', 1, 4, number_rows, 4], 'categories': ['Z-Test', 1, 0, number_rows, 0]})
-            worksheet.insert_chart('G2', chart)
-            writer.close()
-            popupmsg('File Saved', 'Saved as ' + file_to_save)
-            return
-        else:
-            popupmsg("Warning", 'Wrong File Type, Select a .bin or .csv file')
-            pass
+        if file_path.endswith(".bin"):
+            df = read_bin_file(file_path, block_size)
+        elif file_path.endswith(".csv"):
+            df = read_csv_file(file_path)
+        df = calculate_z_test(df, block_size)
+        write_to_excel(df, file_path, block_size, interval)
     except Exception as e:
         popupmsg("Error",
                  f'Something went wrong, please check the parameters and try again. Is the target file already open?, {e}')
-
-
-def binary_data(num_ones_array, an_bit_count):
-    binSheet = pd.DataFrame()  # Array to Pandas Column
-    binSheet['Ones'] = num_ones_array
-    binSheet.dropna(inplace=True)
-    binSheet = binSheet.reset_index()
-    binSheet['index'] = binSheet['index'] + 1
-    binSheet = binSheet.rename(columns={'index': 'Sample'})
-    binSheet['Sum'] = binSheet['Ones'].cumsum()
-    binSheet['Average'] = binSheet['Sum'] / (binSheet['Sample'])
-    binSheet['Zscore'] = (binSheet['Average'] - (an_bit_count / 2)) / (
-            ((an_bit_count / 4) ** 0.5) / (binSheet['Sample'] ** 0.5))
-    return binSheet
-
-
-def ztest_pandas(data_file, an_bit_count):
-    ztest = pd.read_csv(data_file, sep=' ', names=["Time", "Ones"])
-    ztest.dropna(inplace=True)
-    ztest = ztest.reset_index()
-    ztest['index'] = ztest['index'] + 1
-    ztest = ztest.rename(columns={'index': 'Sample'})
-    ztest['Sum'] = ztest['Ones'].cumsum()
-    ztest['Average'] = ztest['Sum'] / (ztest['Sample'])
-    ztest['Zscore'] = (ztest['Average'] - (an_bit_count / 2)) / (((an_bit_count / 4) ** 0.5) / (ztest['Sample'] ** 0.5))
-    return ztest
-
-
-def create_chart(workbook, data_file2, an_bit_count, an_time_count):
-    chart = workbook.add_chart({'type': 'line'})
-    chart.set_title({'name': 'Z-Score: ' + data_file2, 'name_font': {'name': 'Calibri', 'color': 'black', }, })
-
-    chart.set_x_axis({'name': f'Number of samples (one sample every {an_time_count} second(s))',
-                      'name_font': {'name': 'Calibri', 'color': 'black'},
-                      'num_font': {'name': 'Calibri', 'color': 'black', }, })
-
-    chart.set_y_axis(
-        {'name': f'Z-Score - Sample Size = {an_bit_count} bits ', 'name_font': {'name': 'Calibri', 'color': 'black'},
-         'num_font': {'color': 'black', }, })
-
-    chart.set_legend({'position': 'none'})
-    return chart
 
 
 def test_bit_time_rate(bit_count, time_count):

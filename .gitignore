@@ -1,11 +1,5 @@
 __pycache__/
-.idea/
-1-SavedFiles/
-Installer/
-Installer
 output/
 venv/
 .venv/
-.idea/
-.vscode/
 tests/__pycache__

@@ -173,7 +173,7 @@ Do not close this window!""")
         elif event == "Generate":
             if rm.test_bit_time_rate(values["an_bit_count"], values["an_time_count"]):
                 rm.file_to_excel(
-                    values["open_file"], values["an_bit_count"], values["an_time_count"])
+                    values["open_file"])
             else:
                 pass
         elif event == 'live_plot':
@@ -248,7 +248,7 @@ def bit_cap(values, window):
     addr, port, max_msg_size = '127.0.0.1', 1200, 32768
     global thread_cap
     file_name = time.strftime(
-        f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
+        f"%Y%m%dT%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
@@ -272,11 +272,8 @@ def bit_cap(values, window):
         # count numbers of ones in the string
         num_ones_array = bin_ascii.count('1')
         # open file and append time and number of ones
-        with open(file_name + '.csv', "a+") as write_file:
-            write_file.write(
-                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        rm.write_to_csv(num_ones_array, file_name)
         end_cap = time.time()
-        # print(interval_value - (end_cap - start_cap))
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
@@ -296,7 +293,7 @@ def trng3_cap(values, window):
             if rng_com_port == None:  # always chooses the 1st TrueRNG found
                 rng_com_port = str(temp[0])
     file_name = time.strftime(
-        f"%Y%m%d-%H%M%S_trng_s{sample_value}_i{interval_value}")
+        f"%Y%m%dT%H%M%S_trng_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
@@ -334,11 +331,8 @@ def trng3_cap(values, window):
         # count numbers of ones in the string
         num_ones_array = bin_ascii.count('1')
         # open file and append time and number of ones
-        with open(file_name + '.csv', "a+") as write_file:
-            write_file.write(
-                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        rm.write_to_csv(num_ones_array, file_name)
         end_cap = time.time()
-        # print(interval_value - (end_cap - start_cap))
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
@@ -351,7 +345,7 @@ def pseudo_cap(values, window):
     interval_value = int(values["ac_time_count"])
     blocksize = int(sample_value / 8)
     file_name = time.strftime(
-        f"%Y%m%d-%H%M%S_pseudo_s{sample_value}_i{interval_value}")
+        f"%Y%m%dT%H%M%S_pseudo_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     while thread_cap:
         start_cap = time.time()
@@ -372,11 +366,8 @@ def pseudo_cap(values, window):
         # count numbers of ones in the string
         num_ones_array = bin_ascii.count('1')
         # open file and append time and number of ones
-        with open(file_name + '.csv', "a+") as write_file:
-            write_file.write(
-                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        rm.write_to_csv(num_ones_array, file_name)
         end_cap = time.time()
-        # print(interval_value - (end_cap - start_cap))
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
