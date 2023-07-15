@@ -27,8 +27,6 @@ global values
 values = None
 rm.kill_seedd()
 
-# TODO Sort files in concat function to be in order of creation
-
 def main():
     # Mensagem para versão console
     print("""Welcome!
