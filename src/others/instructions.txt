@@ -1,9 +1,12 @@
-# RngKit 2.3
+# RngKit 3.0
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
 thiagojm1984@hotmail.com   
 Written in Python 3.11.4
------------------------
+---
+
+# Important note
+**From version 3.0 onwards we adopted a new datetime and file naming format, so analyzes made with previous collected files will not work, for that use the 2.x verions!**
 
 # ABSTRACT
 
@@ -17,7 +20,7 @@ Afterwards, the data can be analyzed and compared with the number expected by ch
 
 1- TrueRNG and TrueRNGPro (https://ubld.it/);  
 2- Bitbabbler Black and White (http://www.bitbabbler.org/what.html);  
-3- No Hardware: Pseudo RNG (using Python Secrets Module).
+3- No Hardware: Pseudo RNG (using Python Secrets Module - it it not truly random).
 
 # Installation
 
@@ -39,19 +42,19 @@ Afterwards, the data can be analyzed and compared with the number expected by ch
 >### Collecting:  
 >>To collect data, select the device to use, or multiple devices and click "Start". You can set the sample size (in bits) and the sample interval (in seconds). 
 BitBabbler has different capturing options (number of folds), with option 0 being in RAW, options between 1 and 4 in XOR, TrueRNG only works in XOR mode.
-PseudoRNG uses the python secrets module that gathers entropy from your system, it´s probably not a good source of randomness, but you can use if you don´t have a hardware RNG. 
+PseudoRNG uses the python secrets module that gathers entropy from your system, it´s not a good source of true randomness, but you can use if you don´t have a hardware RNG. 
 Hit "Stop" when you wish to stop the process. Two files are going to be created inside the "1-SavedFiles" folder. One with .bin extension and another with .csv.
 The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series and the count of 'ones' that appeared in each series. Usually will be better to analyse the .csv file.   
 
 >### Analysing:  
 >>To analyse the file and generate a Excel file with z-score and a graph, select a previously generated .bin or .csv file whit the "Browse" button.
-Also, be sure the select the correct value for the sample size and sample interval, or you will get wrong results.
+It will detect the interval and the sample size from the filename, so dont change it.
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
 This data and chart represent the cumulative z-score of 'ones' that appeared in the samples.
 This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.  
 
 >### Concatenate:  
->>If you want to concatenate CSV files, browse the files in the "Concatenate Multiples CSV Files". It will create a new concatenated file.
+>>If you want to concatenate CSV files, browse the files in the "Concatenate Multiples CSV Files". It will create a new concatenated file. Its important to concatenate only files with the same interval and sample size, or you will get wrong results. Select the proper Sample Size and Interval before concatenating from the inputs above.
 
 - ## TAB 2: The second tab is for collecting and presenting a live Zscore x Time chart.  
 >Select the device to use (BitBabbler can be set to 0 (RAW) or 1 (XOR)).
@@ -63,7 +66,7 @@ When you finish capturing it is important to click "Stop".
 3- File naming convention:  
 The file name contains important information about the collected data.
 The first part is the date and time of the collection, then the device used (trng for TrueRN, bitb for Bitbabbler and pseudo for PseudoRNG), the number of bits per sample, the time between each sample in seconds and finally, only on Bitbabbler devices, whether in RAW or in XOR (number of folds).
-For example "20201011-142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (20201011), at 14:22:08 (142208), Bitbbabler device (bitb), sample of 2048 bits (s2048) every 1 second (i1), RAW mode (f0).
+For example "20201011T142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (20201011), at 14:22:08 (142208), Bitbbabler device (bitb), sample of 2048 bits (s2048) every 1 second (i1), RAW mode (f0).
 
 # License
 
@@ -71,11 +74,4 @@ MIT License
 
 Copyright (c) 2023 Thiago Jung Mendaçolli
 
-# ScreenShots
-
-![image](https://user-images.githubusercontent.com/30575561/155261747-127a3949-f308-4731-b550-ae879e121c81.png)
-
-![image](https://user-images.githubusercontent.com/30575561/155261890-1ce7c9c0-4dfe-4bf9-b400-b7b42a21f7c0.png)
-
-![image](https://user-images.githubusercontent.com/30575561/155261833-8f784f86-f99d-40c7-a979-a33e59d7f683.png)
 

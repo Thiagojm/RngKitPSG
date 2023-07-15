@@ -1,7 +1,6 @@
 # Default imports
 import time
 import threading
-from time import localtime, strftime
 import secrets
 
 # External imports
@@ -44,7 +43,7 @@ Do not close this window!""")
 
     # TAB 1 - Collect / Analyse
 
-    column_1 = [[sg.T("Choose RNG", size=(25, 1))], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
+    column_1 = [[sg.T("Choose RNG")], [sg.Radio('BitBabbler', "radio_graph_1", k="bit_ac", default=True)],
                 [sg.Radio('TrueRNG', "radio_graph_1", k="true3_ac")],
                 [sg.Radio('TrueRNG + BitBabbler', "radio_graph_1", k="true3_bit_ac")],
                 [sg.Radio('PseudoRNG', "radio_graph_1", k="pseudo_rng_ac")]]
@@ -58,32 +57,32 @@ Do not close this window!""")
                  sg.Input("1", k="ac_time_count", size=(6, 1))],
                 [sg.T(" ")]]
 
-    column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))], [sg.T("")],
+    column_3 = [[sg.B("Start", k='ac_button', size=(20, 1))],
                 [sg.T("        Idle", k="stat_ac", text_color="orange", size=(10, 1), relief="sunken")]]
 
     acquiring_data = [[sg.T(" ")],
                       [sg.Column(column_1), sg.Column(column_2), sg.Column(
                           column_3, element_justification="center")]]
 
-    data_analysis = [[sg.T(" ")], [sg.T(" ", size=(8, 1)), sg.T("Sample Size (bits):", size=(18, 1)),
+    data_analysis = [[sg.T(" ")],
+                     [sg.Text('Select file:', size=(10, 1)), sg.Input(size=(60, 1)),
+                      sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
+                                    initial_folder="./1-SavedFiles", size=(8, 1))],
+                     [sg.T(" ", size=(24, 1)), sg.B("Generate"), sg.T(" ", size=(1, 1)),
+                      sg.B("Open Output Folder", k="out_folder")],
+                     [sg.Text('Concatenate Multiple CSV Files')], [sg.T(" ", size=(8, 1)), sg.T("Sample Size (bits):", size=(18, 1)),
                                    sg.Input("2048", k="an_bit_count", size=(
                                        6, 1)), sg.T(" ", size=(8, 1)),
                                    sg.T("Sample Interval (s):", size=(18, 1)),
                                    sg.Input("1", k="an_time_count", size=(6, 1))], [sg.T(" ")],
-                     [sg.Text('Select file:', size=(10, 1)), sg.Input(size=(60, 1)),
-                      sg.FileBrowse(key='open_file', file_types=(('CSV and Binary', '.csv .bin'),),
-                                    initial_folder="./1-SavedFiles", size=(8, 1)), sg.T(" ", size=(13, 1))],
-                     [sg.T(" ", size=(24, 1)), sg.B("Generate"), sg.T(" ", size=(1, 1)),
-                      sg.B("Open Output Folder", k="out_folder")],
-                     [sg.Text('Concatenate Multiple CSV Files')],
                      [sg.In(), sg.FilesBrowse(key='open_files', file_types=(
                          ('CSV', '.csv'),), initial_folder="./1-SavedFiles", size=(8, 1), files_delimiter=","), sg.B('Concatenate', k="concat")],
                      ]
 
     tab1_layout = [
         [sg.Frame("Acquiring Data", font="Calibri, 20",
-                  layout=acquiring_data, k="acquiring_data", size=(90, 9))],
-        [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", size=(90, 9))]]
+                  layout=acquiring_data, k="acquiring_data", expand_x=True)],
+        [sg.Frame("Data Analysis", font="Calibri, 20", layout=data_analysis, k="data_analysis", expand_x=True)]]
 
     # TAB 2 - Gráfico
     column_graph_1 = [[sg.Radio('BitBabbler', "radio_graph",
@@ -98,7 +97,7 @@ Do not close this window!""")
                           "2048", k="live_bit_count", size=(6, 1))],
                       [sg.T("Sample Interval (s):", size=(16, 1)), sg.Input("1", k="live_time_count", size=(6, 1))]]
 
-    column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))], [sg.T("")],
+    column_graph_3 = [[sg.B("Start", k='live_plot', size=(20, 1))],
                       [sg.T("        Idle", k="stat_live", text_color="orange", size=(10, 1), relief="sunken")]]
 
     graph_options = [[sg.Column(column_graph_1), sg.Column(column_graph_2),
@@ -106,11 +105,11 @@ Do not close this window!""")
 
     live_graph = [[sg.Canvas(key='-CANVAS-')]]
 
-    tab2_layout = [[sg.Frame("Options", font="Calibri, 20", layout=graph_options, k="graph_options", size=(90, 9))],
-                   [sg.Frame("Live Plot", font="Calibri, 20", layout=live_graph, k="graph", size=(90, 9))]]
+    tab2_layout = [[sg.Frame("Options", font="Calibri, 20", layout=graph_options, k="graph_options", expand_x=True)],
+                   [sg.Frame("Live Plot", font="Calibri, 20", layout=live_graph, k="graph", expand_x=True)]]
 
     # TAB 3 - Instruções
-    tab3_layout = [[sg.T("Instructions", relief="raised", justification="center", size=(70, 1), font=("Calibri, 24"))],
+    tab3_layout = [[sg.T("Instructions", relief="raised", justification="center", font=("Calibri, 24"))],
                    [sg.Multiline(default_text=instruction_text, size=(75, 19), disabled=True, enable_events=False,
                                  font=("Calibri, 20"), pad=(5, 5))]]
 
@@ -121,7 +120,7 @@ Do not close this window!""")
         tab_location="top", font="Calibri, 18")]]
 
     # WINDOW
-    window = sg.Window("RngKit ver 2.3 - by Thiago Jung - thiagojm1984@hotmail.com", layout, size=(1024, 720),
+    window = sg.Window("RngKit ver 3.0 - by Thiago Jung - thiagojm1984@hotmail.com", layout,
                        location=(50, 50), finalize=True, element_justification="center", font="Calibri 18",
                        resizable=True, icon=("src/images/BitB.ico"))
 
