@@ -72,16 +72,19 @@ def popupmsg(msg_title, msg):
                           icon="src/images/BitB.ico")
 
 
-def concat_files(all_filenames):
+def concat_files(all_filenames, values):
     try:
-        file_name = time.strftime(f"%Y%m%d-%H%M%S")
+        sample_value = int(values["ac_bit_count"])
+        interval_value = int(values["ac_time_count"])
+        file_name = time.strftime(
+        f"%Y%m%dT%H%M%S_concat_s{sample_value}_i{interval_value}.csv")
         with ExitStack() as stack:
             files = [stack.enter_context(open(fname)) for fname in all_filenames]
-            with open(f"1-SavedFiles/{file_name}_concat.csv", "a") as f:
+            with open(f"1-SavedFiles/{file_name}", "a") as f:
                 for file in files:
                     for line in file:
                         f.write(line)
-        popupmsg("Sucess", f"Concatenated file saved as: 1-SavedFiles/{file_name}_concat.csv")
+        popupmsg("Sucess", f"Concatenated file saved as: 1-SavedFiles/{file_name}")
     except Exception:
         popupmsg("Error", "Select valid files")
                     

@@ -169,7 +169,7 @@ Do not close this window!""")
             rm.open_folder()
         elif event == "concat":
             all_files = values['open_files'].split(",")
-            rm.concat_files(all_files)
+            rm.concat_files(all_files, values)
         elif event == "Generate":
             if rm.test_bit_time_rate(values["an_bit_count"], values["an_time_count"]):
                 rm.file_to_excel(
@@ -397,7 +397,7 @@ def pseudo_live(values, window):
     sample_value = int(values["live_bit_count"])
     interval_value = int(values["live_time_count"])
     file_name = time.strftime(
-        f"%Y%m%d-%H%M%S_pseudo_s{sample_value}_i{interval_value}")
+        f"%Y%m%dT%H%M%S_pseudo_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
     csv_ones = []
@@ -431,11 +431,8 @@ def pseudo_live(values, window):
         zscore_array.append(zscore_csv)
         index_number_array.append(index_number)
         # open file and append time and number of ones
-        with open(file_name + '.csv', "a+") as write_file:
-            write_file.write(
-                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        rm.write_to_csv(num_ones_array, file_name)
         end_cap = time.time()
-        # print(interval_value - (end_cap - start_cap) / 1000)
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
@@ -454,7 +451,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
     addr, port, max_msg_size = '127.0.0.1', 1200, 32768
     
     file_name = time.strftime(
-        f"%Y%m%d-%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
+        f"%Y%m%dT%H%M%S_bitb_s{sample_value}_i{interval_value}_f{xor_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
     csv_ones = []
@@ -490,9 +487,7 @@ def livebblaWin(values, window):  # Function to take live data from bitbabbler
         zscore_array.append(zscore_csv)
         index_number_array.append(index_number)
         # open file and append time and number of ones
-        with open(file_name + '.csv', "a+") as write_file:
-            write_file.write(
-                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        rm.write_to_csv(num_ones_array, file_name)
         end_cap = time.time()
         # print(interval_value - (end_cap - start_cap))
         try:
@@ -509,7 +504,7 @@ def trng3live(values, window):
     sample_value = int(values["live_bit_count"])
     interval_value = int(values["live_time_count"])
     file_name = time.strftime(
-        f"%Y%m%d-%H%M%S_trng_s{sample_value}_i{interval_value}")
+        f"%Y%m%dT%H%M%S_trng_s{sample_value}_i{interval_value}")
     file_name = f"1-SavedFiles/{file_name}"
     index_number = 0
     csv_ones = []
@@ -585,16 +580,12 @@ def trng3live(values, window):
         zscore_array.append(zscore_csv)
         index_number_array.append(index_number)
         # open file and append time and number of ones
-        with open(file_name + '.csv', "a+") as write_file:
-            write_file.write(
-                f'{strftime("%H:%M:%S", localtime())} {num_ones_array}\n')
+        rm.write_to_csv(num_ones_array, file_name)
         end_cap = time.time()
-        # print(interval_value - (end_cap - start_cap) / 1000)
         try:
             time.sleep(interval_value - (end_cap - start_cap))
         except Exception:
             pass
-
 
 if __name__ == '__main__':
     main()
