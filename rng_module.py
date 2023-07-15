@@ -223,6 +223,7 @@ def write_to_excel(dataframe, file_path, block_size, interval):
     worksheet.insert_chart('F2', chart)
 
     writer.close()
+    popupmsg("Sucess", f"Saved file as: {file_to_save}")
 
 
 # This function reads a .csv or .bin file do calculations and save to a .xlsx file.
