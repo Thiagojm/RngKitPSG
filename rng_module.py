@@ -72,19 +72,30 @@ def popupmsg(msg_title, msg):
                           icon="src/images/BitB.ico")
 
 
+def extract_datetime(filename):
+    datetime_str = re.findall(r'\d{8}T\d{6}', filename)[0]
+    return datetime.strptime(datetime_str, '%Y%m%dT%H%M%S')
+
 def concat_files(all_filenames, values):
     try:
         sample_value = int(values["ac_bit_count"])
         interval_value = int(values["ac_time_count"])
         file_name = time.strftime(
         f"%Y%m%dT%H%M%S_concat_s{sample_value}_i{interval_value}.csv")
+        
+        # get the directory of the first file in the list
+        directory = os.path.dirname(all_filenames[0]) if all_filenames else ''
+        output_path = os.path.join(directory, file_name)
+
+        all_filenames.sort(key=extract_datetime)  # Sorting filenames by datetime
+
         with ExitStack() as stack:
             files = [stack.enter_context(open(fname)) for fname in all_filenames]
-            with open(f"1-SavedFiles/{file_name}", "a") as f:
+            with open(output_path, "a") as f:
                 for file in files:
                     for line in file:
                         f.write(line)
-        popupmsg("Sucess", f"Concatenated file saved as: 1-SavedFiles/{file_name}")
+        popupmsg("Sucess", f"Concatenated file saved as: {output_path}")
     except Exception:
         popupmsg("Error", "Select valid files")
                     
