@@ -1,0 +1,18 @@
+[project]
+name = "rngkitpsg"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "bitstring>=4.2.3",
+    "matplotlib>=3.9.2",
+    "numpy>=2.1.2",
+    "pandas>=2.2.3",
+    "pillow>=11.0.0",
+    "psutil>=6.0.0",
+    "pyserial>=3.5",
+    "pysimplegui==4.70.1",
+    "python-dateutil>=2.9.0.post0",
+    "xlsxwriter>=3.2.0",
+]
