@@ -130,7 +130,10 @@ def render_data_collection_tab():
         
         with col_status:
             # Auto-updating collection status
-            @st.fragment(run_every=1)
+            # Only run fragment when collecting
+            run_every = 1 if st.session_state.collecting else None
+            
+            @st.fragment(run_every=run_every)
             def update_collection_status():
                 if st.session_state.collecting:
                     # Generate new data
@@ -326,7 +329,10 @@ def render_live_plot_tab():
 
         
         # Auto-updating live chart
-        @st.fragment(run_every=1)
+        # Only run fragment when live plotting
+        run_every = 1 if st.session_state.live_plotting else None
+        
+        @st.fragment(run_every=run_every)
         def update_live_chart():
             if st.session_state.live_plotting:
                 # Generate new data
@@ -593,6 +599,7 @@ def stop_data_collection():
     st.session_state.collecting = False
     rm.kill_seedd()
     st.success("⏹️ Data collection stopped!")
+    # Force rerun to update fragments
     st.rerun()
 
 def collect_live_plot_sample():
@@ -814,6 +821,7 @@ def stop_live_plotting():
     st.session_state.live_plotting = False
     rm.kill_seedd()
     st.success("⏹️ Live plotting stopped!")
+    # Force rerun to update fragments
     st.rerun()
 
 if __name__ == "__main__":
