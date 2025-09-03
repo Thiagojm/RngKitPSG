@@ -57,7 +57,7 @@ The program has 3 tabs:
 >>To collect data, select the device to use, or multiple devices and click "Start". You can set the sample size (in bits) and the sample interval (in seconds). 
 BitBabbler supports folds 0–4 (0 = RAW; 1–4 = XOR folding). TrueRNG has no fold option.
 PseudoRNG uses the Python `secrets` module that gathers entropy from your system; it is not a good source of true randomness, but you can use it if you don’t have a hardware RNG. 
-Hit "Stop" when you wish to stop the process. Two files are going to be created inside the "1-SavedFiles" folder. One with .bin extension and another with .csv.
+Hit "Stop" when you wish to stop the process. Two files are going to be created inside the `data/raw/` folder by default (override with env `RNGKIT_DATA_DIR`). One with .bin extension and another with .csv.
 The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series and the count of 'ones' that appeared in each series. Usually it will be better to analyse the .csv file.   
 
 >### Analysing:  
@@ -65,14 +65,14 @@ The .bin is in binary form and is used as a controller. The .csv contains more i
 The app now auto‑detects the interval and the sample size from the filename.
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
 This data and chart represent the cumulative Z‑score of 'ones' that appeared in the samples.
-This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.  
+This file will be saved in the `data/raw/` folder. You can click "Open Output Folder" to open Windows Explorer at the file location.  
 
 >### Concatenate:  
 >>If you want to concatenate CSV files, browse the files in "Concatenate Multiple CSV Files". It will create a new concatenated file. It’s important to concatenate only files with the same interval and sample size, or you will get wrong results. Select the proper Sample Size and Interval before concatenating from the inputs above.
 
 - ## Tab 2 — Live Plot  
 >Select the device to use (BitBabbler folds 0–4 supported).
-Click on "Start", the chart will update and at the same time two files will be generated and saved (.bin and .csv).
+Click on "Start", the chart will update and at the same time two files will be generated and saved to `data/raw/` (.bin and .csv).
 When you finish capturing it is important to click "Stop".
 
 - ## Tab 3 — Instructions

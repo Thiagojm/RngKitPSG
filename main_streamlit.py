@@ -16,7 +16,15 @@ import pandas as pd
 import numpy as np
 
 # Internal imports
-import rng_module_streamlit as rm
+
+# Make 'src' importable for the service layer
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from rngkit.services import filenames as fn_service  # type: ignore
+from rngkit.services import storage as storage_service  # type: ignore
+from rngkit.services import utils as svc_utils  # type: ignore
+from rngkit.devices import bitbabbler as dev_bitb  # type: ignore
+from rngkit.devices import truerng as dev_trng  # type: ignore
+from rngkit.devices import pseudo as dev_pseudo  # type: ignore
 
 # Page configuration
 st.set_page_config(
@@ -52,8 +60,8 @@ if 'csv_ones' not in st.session_state:
 
 # No seedd process management needed with bbpy
 
-# Ensure 1-SavedFiles directory exists
-os.makedirs("1-SavedFiles", exist_ok=True)
+# Ensure data directory exists
+DATA_DIR = svc_utils.ensure_data_dir()
 
 def main():
     # Header
@@ -154,11 +162,11 @@ def render_data_collection_tab():
         st.subheader("📈 Data Analysis")
         
         # File selection for analysis
-        st.info("💡 **Tip**: Navigate to the `1-SavedFiles` folder to find your generated files")
+        st.info("💡 **Tip**: Navigate to the data folder to find your generated files")
         uploaded_file = st.file_uploader(
             "Select file for analysis:",
             type=['csv', 'bin'],
-            help="Select a previously generated .csv or .bin file from the 1-SavedFiles folder"
+            help="Select a previously generated .csv or .bin file from the data folder"
         )
         
         if uploaded_file:
@@ -171,8 +179,8 @@ def render_data_collection_tab():
             detected_sample = 2048
             detected_interval = 1
             try:
-                detected_sample = rm.find_bit_count(uploaded_file.name)
-                detected_interval = rm.find_interval(uploaded_file.name)
+                detected_sample = fn_service.parse_bits(uploaded_file.name)
+                detected_interval = fn_service.parse_interval(uploaded_file.name)
             except Exception:
                 pass
 
@@ -205,14 +213,20 @@ def render_data_collection_tab():
             
             with analysis_btn_col1:
                 if st.button("📊 Generate Analysis", use_container_width=True):
-                    if rm.test_bit_time_rate(an_sample_size, an_sample_interval):
-                        # Save uploaded file to 1-SavedFiles folder
-                        file_path = f"1-SavedFiles/{uploaded_file.name}"
+                    if svc_utils.is_valid_params(an_sample_size, an_sample_interval):
+                        # Save uploaded file to data folder
+                        file_path = os.path.join(DATA_DIR, uploaded_file.name)
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
                         
                         try:
-                            rm.file_to_excel(file_path)
+                            # Build dataframe depending on extension
+                            if file_path.endswith('.bin'):
+                                df = storage_service.read_bin_counts(file_path, an_sample_size)
+                            else:
+                                df = storage_service.read_csv_counts(file_path)
+                            df = storage_service.add_zscore(df, an_sample_size)
+                            storage_service.write_excel_with_chart(df, file_path, an_sample_size, an_sample_interval)
                             st.success("✅ Analysis completed! Check the output folder.")
                         except Exception as e:
                             st.error(f"❌ Analysis failed: {str(e)}")
@@ -221,17 +235,17 @@ def render_data_collection_tab():
             
             with analysis_btn_col2:
                 if st.button("📁 Open Output Folder", use_container_width=True):
-                    rm.open_folder()
+                    os.startfile(DATA_DIR)
         
         # File concatenation section
         st.subheader("🔗 Concatenate Multiple CSV Files")
-        st.info("💡 **Tip**: Navigate to the `1-SavedFiles` folder to find your CSV files")
+        st.info("💡 **Tip**: Navigate to the data folder to find your CSV files")
         
         concat_files = st.file_uploader(
             "Select multiple CSV files to concatenate:",
             type=['csv'],
             accept_multiple_files=True,
-            help="Select multiple CSV files with the same sample size and interval from the 1-SavedFiles folder"
+            help="Select multiple CSV files with the same sample size and interval from the data folder"
         )
         
         if concat_files:
@@ -257,22 +271,19 @@ def render_data_collection_tab():
             
             if st.button("🔗 Concatenate Files", use_container_width=True):
                 if len(concat_files) > 1:
-                    # Save uploaded files to 1-SavedFiles folder
+                    # Save uploaded files to data folder
                     file_paths = []
                     for file in concat_files:
-                        file_path = f"1-SavedFiles/{file.name}"
+                        file_path = os.path.join(DATA_DIR, file.name)
                         with open(file_path, "wb") as f:
                             f.write(file.getbuffer())
                         file_paths.append(file_path)
                     
                     try:
-                        # Create values dict for concat_files function
-                        values = {
-                            "an_bit_count": concat_sample_size,
-                            "an_time_count": concat_sample_interval
-                        }
-                        rm.concat_files(file_paths, values)
-                        st.success("✅ Files concatenated successfully!")
+                        # Create output stem with timestamp and parameters
+                        out_stem = time.strftime(f"%Y%m%dT%H%M%S_concat_s{concat_sample_size}_i{concat_sample_interval}")
+                        out_path = storage_service.concat_csv_files([*file_paths], out_stem)
+                        st.success(f"✅ Files concatenated successfully! Saved: {out_path}")
                     except Exception as e:
                         st.error(f"❌ Concatenation failed: {str(e)}")
                 else:
@@ -441,7 +452,7 @@ def collect_bitbabbler_sample(values, file_name):
     
     try:
         with open(file_name + '.bin', "ab+") as bin_file:
-            chunk = rm.bb_read_bytes(sample_bytes, folds)
+            chunk = dev_bitb.read_bytes(sample_bytes, folds)
             if chunk:
                 bin_file.write(chunk)
             else:
@@ -456,7 +467,7 @@ def collect_bitbabbler_sample(values, file_name):
             return
         
         num_ones_array = bin_ascii.count('1')
-        rm.write_to_csv(num_ones_array, file_name)
+        storage_service.write_csv_count(num_ones_array, file_name)
         
         # Update session state
         st.session_state.collected_data.append({
@@ -496,7 +507,7 @@ def collect_trng3_sample(values, file_name):
         bin_hex = BitArray(x)
         bin_ascii = bin_hex.bin
         num_ones_array = bin_ascii.count('1')
-        rm.write_to_csv(num_ones_array, file_name)
+        storage_service.write_csv_count(num_ones_array, file_name)
         
         # Update session state
         st.session_state.collected_data.append({
@@ -516,13 +527,13 @@ def collect_pseudo_sample(values, file_name):
     
     try:
         with open(file_name + '.bin', "ab") as bin_file:
-            x = secrets.token_bytes(blocksize)
+            x = dev_pseudo.read_bytes(blocksize)
             bin_file.write(x)
         
         bin_hex = BitArray(x)
         bin_ascii = bin_hex.bin
         num_ones_array = bin_ascii.count('1')
-        rm.write_to_csv(num_ones_array, file_name)
+        storage_service.write_csv_count(num_ones_array, file_name)
         
         # Update session state
         st.session_state.collected_data.append({
@@ -538,7 +549,7 @@ def collect_pseudo_sample(values, file_name):
 def start_data_collection(rng_type, xor_mode, sample_size, sample_interval):
     """Start data collection process"""
     # Validate parameters
-    if not rm.test_bit_time_rate(sample_size, sample_interval):
+    if not svc_utils.is_valid_params(sample_size, sample_interval):
         st.error("❌ Invalid parameters. Sample size must be divisible by 8.")
         return
     
@@ -553,8 +564,15 @@ def start_data_collection(rng_type, xor_mode, sample_size, sample_interval):
         "ac_time_count": sample_interval
     }
     
-    # Check USB capabilities
-    if not rm.check_usb_cap(values):
+    # Device detection via adapters
+    ok = True
+    if values["bit_ac"] and not dev_bitb.detect():
+        ok = False
+    elif values["true3_ac"] and not dev_trng.detect():
+        ok = False
+    elif values["true3_bit_ac"] and not (dev_bitb.detect() and dev_trng.detect()):
+        ok = False
+    if not ok:
         if rng_type == "BitBabbler":
             st.error("❌ BitBabbler device check failed!")
             st.error("**Troubleshooting steps:**")
@@ -566,11 +584,10 @@ def start_data_collection(rng_type, xor_mode, sample_size, sample_interval):
             st.error("❌ Device check failed. Please ensure your device is connected.")
         return
     
-    # Generate filename (include fold for BitBabbler)
+    # Generate filename using service
     device_suffix = "bitb" if (values["bit_ac"] or values["true3_bit_ac"]) else "trng" if values["true3_ac"] else "pseudo"
-    fold_suffix = f"_f{xor_mode}" if (values["bit_ac"] or values["true3_bit_ac"]) else ""
-    file_name = time.strftime(f"%Y%m%dT%H%M%S_{device_suffix}_s{sample_size}_i{sample_interval}{fold_suffix}")
-    file_name = f"1-SavedFiles/{file_name}"
+    file_name = fn_service.format_capture_name(device_suffix, sample_size, sample_interval, xor_mode if device_suffix == "bitb" else None)
+    file_name = os.path.join(DATA_DIR, file_name)
     
     # Start collection
     st.session_state.collecting = True
@@ -628,7 +645,7 @@ def collect_live_bitbabbler_sample(values, file_name):
     
     try:
         with open(file_name + '.bin', "ab+") as bin_file:
-            chunk = rm.bb_read_bytes(sample_bytes, folds)
+            chunk = dev_bitb.read_bytes(sample_bytes, folds)
             if chunk:
                 bin_file.write(chunk)
             else:
@@ -644,7 +661,7 @@ def collect_live_bitbabbler_sample(values, file_name):
         
         num_ones_array = bin_ascii.count('1')
         st.session_state.csv_ones.append(num_ones_array)
-        rm.write_to_csv(num_ones_array, file_name)
+        storage_service.write_csv_count(num_ones_array, file_name)
         
         # Calculate Z-score
         index_number = len(st.session_state.csv_ones)
@@ -665,30 +682,16 @@ def collect_live_trng3_sample(values, file_name):
     sample_value = int(values["live_bit_count"])
     blocksize = int(sample_value / 8)
     
-    ports_available = list(list_ports.comports())
-    rng_com_port = None
-    for temp in ports_available:
-        if temp[1].startswith("TrueRNG"):
-            if rng_com_port is None:
-                rng_com_port = str(temp[0])
-    
     try:
         with open(file_name + '.bin', "ab+") as bin_file:
-            ser = serial.Serial(port=rng_com_port, timeout=10)
-            if not ser.isOpen():
-                ser.open()
-            ser.setDTR(True)
-            ser.flushInput()
-            
-            chunk = ser.read(blocksize)
+            chunk = dev_trng.read_bytes(blocksize)
             bin_file.write(chunk)
-            ser.close()
         
         bin_hex = BitArray(chunk)
         bin_ascii = bin_hex.bin
         num_ones_array = int(bin_ascii.count('1'))
         st.session_state.csv_ones.append(num_ones_array)
-        rm.write_to_csv(num_ones_array, file_name)
+        storage_service.write_csv_count(num_ones_array, file_name)
         
         # Calculate Z-score
         index_number = len(st.session_state.csv_ones)
@@ -718,7 +721,7 @@ def collect_live_pseudo_sample(values, file_name):
         bin_ascii = bin_hex.bin
         num_ones_array = int(bin_ascii.count('1'))
         st.session_state.csv_ones.append(num_ones_array)
-        rm.write_to_csv(num_ones_array, file_name)
+        storage_service.write_csv_count(num_ones_array, file_name)
         
         # Calculate Z-score
         index_number = len(st.session_state.csv_ones)
@@ -737,7 +740,7 @@ def collect_live_pseudo_sample(values, file_name):
 def start_live_plotting(rng_type, xor_mode, sample_size, sample_interval):
     """Start live plotting process"""
     # Validate parameters
-    if not rm.test_bit_time_rate(sample_size, sample_interval):
+    if not svc_utils.is_valid_params(sample_size, sample_interval):
         st.error("❌ Invalid parameters. Sample size must be divisible by 8.")
         return
     
@@ -752,7 +755,13 @@ def start_live_plotting(rng_type, xor_mode, sample_size, sample_interval):
     }
     
     # Check USB capabilities
-    if not rm.check_usb_live(values):
+    # Device detection via adapters
+    ok_live = True
+    if values["bit_live"] and not dev_bitb.detect():
+        ok_live = False
+    elif values["true3_live"] and not dev_trng.detect():
+        ok_live = False
+    if not ok_live:
         if rng_type == "BitBabbler":
             st.error("❌ BitBabbler device check failed!")
             st.error("**Troubleshooting steps:**")
@@ -764,11 +773,10 @@ def start_live_plotting(rng_type, xor_mode, sample_size, sample_interval):
             st.error("❌ Device check failed. Please ensure your device is connected.")
         return
     
-    # Generate filename (include fold for BitBabbler)
+    # Generate filename using service
     device_suffix = "bitb" if values["bit_live"] else "trng" if values["true3_live"] else "pseudo"
-    fold_suffix = f"_f{xor_mode}" if values["bit_live"] else ""
-    file_name = time.strftime(f"%Y%m%dT%H%M%S_{device_suffix}_s{sample_size}_i{sample_interval}{fold_suffix}")
-    file_name = f"1-SavedFiles/{file_name}"
+    file_name = fn_service.format_capture_name(device_suffix, sample_size, sample_interval, xor_mode if device_suffix == "bitb" else None)
+    file_name = os.path.join(DATA_DIR, file_name)
     
     # Start live plotting
     st.session_state.live_plotting = True
