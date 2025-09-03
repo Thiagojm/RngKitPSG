@@ -167,11 +167,26 @@ def render_data_collection_tab():
             # Analysis parameters (auto-detected from filename)
             analysis_col1, analysis_col2 = st.columns(2)
             
+            # Try to detect defaults from filename convention
+            detected_sample = 2048
+            detected_interval = 1
+            try:
+                detected_sample = rm.find_bit_count(uploaded_file.name)
+                detected_interval = rm.find_interval(uploaded_file.name)
+            except Exception:
+                pass
+
+            # Update session defaults when file changes
+            if st.session_state.get('_last_uploaded_for_analysis') != uploaded_file.name:
+                st.session_state['an_sample_size'] = detected_sample
+                st.session_state['an_sample_interval'] = detected_interval
+                st.session_state['_last_uploaded_for_analysis'] = uploaded_file.name
+            
             with analysis_col1:
                 an_sample_size = st.number_input(
                     "Sample Size (bits):",
                     min_value=8,
-                    value=2048,
+                    value=st.session_state.get('an_sample_size', detected_sample),
                     step=8,
                     key="an_sample_size"
                 )
@@ -180,7 +195,7 @@ def render_data_collection_tab():
                 an_sample_interval = st.number_input(
                     "Sample Interval (seconds):",
                     min_value=1,
-                    value=1,
+                    value=st.session_state.get('an_sample_interval', detected_interval),
                     step=1,
                     key="an_sample_interval"
                 )

@@ -2,85 +2,94 @@
 by Thiago Jung  
 https://github.com/Thiagojm/RngKitPSG  
 thiagojm1984@hotmail.com   
-Written in Python 3.11.4
+Written in Python 3.13
 ---
-<br/>
 
-# Important note
-**From version 3.0 onwards we adopted a new datetime and file naming format, so analyzes made with previous collected files will not work, for that use the 2.x verions!**
+## Important note
+**From version 3.0 onwards we adopted a new datetime and file naming format, so analyses made with previously collected files will not work. For those, use the 2.x versions.**
 
-<br/>
-
-# ABSTRACT
-
-This application uses two types of TRNGs - True Random Number Generators (TrueRNG and Bitbbabler) and a Pseudo RNG (based on python secrets module)
-for data collection and statistical analysis for several purposes, including mind-matter interaction research.  
-It uses random number generation to collect and count the number of times the '1' bit appears in a series of user-defined size and interval.
-Afterwards, the data can be analyzed and compared with the number expected by chance (50%) and create a chart with a cumulative Z-Score.
+### What changed in 3.x
+- Direct BitBabbler support via Python (no seedd.exe daemon needed)
+- File names for BitBabbler now include the fold setting (e.g., `_f0`..`_f4`)
+- Data Analysis auto-detects sample size and interval from the file name
 
 
-# Supported Hardware:
+## Abstract
+
+This application uses two types of TRNGs — True Random Number Generators (TrueRNG and BitBabbler) — and a Pseudo RNG (based on Python’s `secrets` module)
+for data collection and statistical analysis for several purposes, including mind–matter interaction research.  
+It collects random data in user-defined sample sizes and intervals and counts the number of ‘1’ bits per sample.
+Afterwards, the data can be analyzed against the expected value (50%) and visualized as a cumulative Z‑Score.
+
+
+## Supported hardware
 
 1- TrueRNG and TrueRNGPro (https://ubld.it/);  
-2- Bitbabbler Black and White (http://www.bitbabbler.org/what.html);  
-3- No Hardware: Pseudo RNG (using Python Secrets Module - it it not truly random).
+2- BitBabbler Black and White (http://www.bitbabbler.org/what.html);  
+3- No Hardware: Pseudo RNG (using Python `secrets` module — not truly random).
 
-# Installation
+## Installation
 
-1- Hardware Installation:
+1- Hardware Installation (Windows):
     The default installation path is: "C:\Users\Username\RngKit" - Where Username is the name of the windows current user.  
-    1.1- TrueRNG e TrueRNGPro:  
+    1.1- TrueRNG and TrueRNGPro:  
          Choose from the 2-Installation folder (inside the "C:\Users\Username\RngKit") the TrueRng folder, the folder for your device (TrueRng3 or TrueRngPro)
          Within this folder, right-click the TrueRNG.inf or TrueRNGpro.inf file and select Install. Follow the instructions for installation.  
-    1.2- Bitbabbler:  
-         Inside the 2-Installation\BitBabbler folder (inside the "C:\Users\Username\RngKit"), run vcredist_x64.exe (source: http://www.microsoft.com/en-us/download/details.aspx?id=30679) and follow the installation guidelines.
-         Insert your bitbabbler device into a USB port and run the zadig-2.8.exe file (source: http://zadig.akeo.ie/). Select your device and click "Install Driver".
+    1.2- BitBabbler:  
+         Inside the 2-Installation\BitBabbler folder (inside the "C:\Users\Username\RngKit"), run vcredist_x64.exe and follow the installation guidelines.
+         Insert your BitBabbler device into a USB port and run the zadig-2.8.exe file. Select your device and click "Install Driver".
          Wait for the process to finish and close the program.
+2- Python dependencies:
+    Use the provided requirements file: `pip install -r requirements_streamlit.txt`
 
-# Usage
+## Usage
 
-1- Start the program;  
-2- The program has 3 tabs:
-- ## TAB 1: The first tab is for analysis and collecting data:
+Run the app:
+
+```bash
+streamlit run main_streamlit.py
+```
+
+The program has 3 tabs:
+
+- ## Tab 1 — Data Collection & Analysis
 >### Collecting:  
 >>To collect data, select the device to use, or multiple devices and click "Start". You can set the sample size (in bits) and the sample interval (in seconds). 
-BitBabbler has different capturing options (number of folds), with option 0 being in RAW, options between 1 and 4 in XOR, TrueRNG only works in XOR mode.
-PseudoRNG uses the python secrets module that gathers entropy from your system, it´s not a good source of true randomness, but you can use if you don´t have a hardware RNG. 
+BitBabbler supports folds 0–4 (0 = RAW; 1–4 = XOR folding). TrueRNG has no fold option.
+PseudoRNG uses the Python `secrets` module that gathers entropy from your system; it is not a good source of true randomness, but you can use it if you don’t have a hardware RNG. 
 Hit "Stop" when you wish to stop the process. Two files are going to be created inside the "1-SavedFiles" folder. One with .bin extension and another with .csv.
-The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series and the count of 'ones' that appeared in each series. Usually will be better to analyse the .csv file.   
+The .bin is in binary form and is used as a controller. The .csv contains more info, like the time of each collected series and the count of 'ones' that appeared in each series. Usually it will be better to analyse the .csv file.   
 
 >### Analysing:  
->>To analyse the file and generate a Excel file with z-score and a graph, select a previously generated .bin or .csv file whit the "Browse" button.
-It will detect the interval and the sample size from the filename, so dont change it.
+>>To analyse the file and generate an Excel file with Z‑score and a graph, select a previously generated .bin or .csv file with the "Browse" button.
+The app now auto‑detects the interval and the sample size from the filename.
 Clicking "Generate" will automatically generate a file with the same name as the one selected, but with extension .xlsx, with the analyzed data.
-This data and chart represent the cumulative z-score of 'ones' that appeared in the samples.
+This data and chart represent the cumulative Z‑score of 'ones' that appeared in the samples.
 This file will be saved in the "1-SavedFiles" folder. You can click "Open Output Folder" to open Windows Explorer at the file location.  
 
 >### Concatenate:  
->>If you want to concatenate CSV files, browse the files in the "Concatenate Multiples CSV Files". It will create a new concatenated file. Its important to concatenate only files with the same interval and sample size, or you will get wrong results. Select the proper Sample Size and Interval before concatenating from the inputs above.
+>>If you want to concatenate CSV files, browse the files in "Concatenate Multiple CSV Files". It will create a new concatenated file. It’s important to concatenate only files with the same interval and sample size, or you will get wrong results. Select the proper Sample Size and Interval before concatenating from the inputs above.
 
-- ## TAB 2: The second tab is for collecting and presenting a live Zscore x Time chart.  
->Select the device to use (BitBabbler can be set to 0 (RAW) or 1 (XOR)).
+- ## Tab 2 — Live Plot  
+>Select the device to use (BitBabbler folds 0–4 supported).
 Click on "Start", the chart will update and at the same time two files will be generated and saved (.bin and .csv).
 When you finish capturing it is important to click "Stop".
 
-- ## TAB 3: Instructions Tab
+- ## Tab 3 — Instructions
 
-3- File naming convention:  
+## File naming convention
 The file name contains important information about the collected data.
-The first part is the date and time of the collection, then the device used (trng for TrueRN, bitb for Bitbabbler and pseudo for PseudoRNG), the number of bits per sample, the time between each sample in seconds and finally, only on Bitbabbler devices, whether in RAW or in XOR (number of folds).
-For example "20201011T142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (20201011), at 14:22:08 (142208), Bitbbabler device (bitb), sample of 2048 bits (s2048) every 1 second (i1), RAW mode (f0).
+The format is: `YYYYMMDDTHHMMSS_{device}_s{bits}_i{interval}[_f{folds}]`
+Where `device` ∈ {`trng`, `bitb`, `pseudo`}. The `_f{folds}` suffix only appears for BitBabbler captures (f0 = RAW, f1–f4 = XOR folding levels).
 
-# License
+For example "20201011T142208_bitb_s2048_i1_f0": Collected on October 11, 2020 (20201011), at 14:22:08 (142208), BitBabbler device (bitb), sample of 2048 bits (s2048) every 1 second (i1), RAW mode (f0).
+
+## License
 
 MIT License
 
-Copyright (c) 2023 Thiago Jung Mendaçolli
+Copyright (c) 2025 Thiago Jung Mendaçolli
 
-# ScreenShots
 
-![image](src/images/RngKit_1.jpg)
-
-![image](src/images/RngKit_2.jpg)
 
 
