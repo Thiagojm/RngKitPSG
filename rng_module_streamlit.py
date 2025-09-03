@@ -3,18 +3,22 @@ import csv
 from datetime import datetime
 import re
 import os, sys
-import socket
-import subprocess
 from contextlib import ExitStack
 import time
+from typing import Optional
 
 # External imports
 import pandas as pd
 from bitstring import BitArray
 from serial.tools import list_ports
 import xlsxwriter
-import psutil
 import numpy as np
+
+# BitBabbler (bbpy) integration
+try:
+    from modules.bbpy.bitbabbler import BitBabbler  # type: ignore
+except Exception:
+    BitBabbler = None  # Will handle gracefully in detection
 
 
 def write_to_csv(count, filename):
@@ -31,50 +35,49 @@ def write_to_csv(count, filename):
         writer.writerow([formatted_now, count])
 
 
-def kill_seedd():
-    # Get a list of all running processes
-    all_processes = psutil.process_iter()
+## seedd.exe daemon helpers removed (using direct bbpy reading now)
 
-    # Iterate over the running processes and find the process named 'seedd.exe'
-    for process in all_processes:
-        if process.name() == 'seedd.exe':
-            # Terminate the process
-            process.terminate()
-            print(f"Process {process.name()} ({process.pid}) has been terminated.")
-            break  # Exit the loop once the process is found and terminated
 
-def is_seedd_running():
-    """Check if seedd.exe is currently running"""
+# ----------------- BitBabbler helpers (bbpy) --------------------------
+_bb_cached: Optional[object] = None
+
+
+def _bb_get_device() -> Optional[object]:
+    """Return a cached/open BitBabbler device, or None if unavailable.
+
+    Caches the device for reuse to reduce open/init overhead.
+    """
+    global _bb_cached
+    if BitBabbler is None:
+        return None
+    if _bb_cached is not None:
+        return _bb_cached
     try:
-        all_processes = psutil.process_iter()
-        for process in all_processes:
-            if process.name() == 'seedd.exe':
-                return True
-        return False
-    except Exception as e:
-        print(f"Error checking seedd process: {e}")
-        return False
+        _bb_cached = BitBabbler.open()
+        return _bb_cached
+    except Exception:
+        _bb_cached = None
+        return None
 
-def start_seedd(command):
-    process = subprocess.Popen(command, shell=True)
 
-def read_from_deamon(addr, port, bytes_requested, max_msg_size):
-    if bytes_requested < 1:
-        print("Not reading 0 bytes")
-        sys.exit(1)
-    elif bytes_requested > max_msg_size:
-        print("Maximum request is", max_msg_size)
-        sys.exit(1)
+def bb_detect() -> bool:
+    """Detect whether a BitBabbler device is available using bbpy."""
+    dev = _bb_get_device()
+    return dev is not None
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    
-    # Send the requested number of bytes as a network-order short.
-    msg = bytes([bytes_requested >> 8, bytes_requested & 0xFF])
 
-    sock.sendto(msg, (addr, port))
-    
-    data, _ = sock.recvfrom(max_msg_size)
-    return data 
+def bb_read_bytes(out_len: int, folds: int = 0) -> bytes:
+    """Read random bytes directly from BitBabbler using bbpy.
+
+    - out_len: number of output bytes desired (after folding)
+    - folds: XOR-fold count, 0 = raw
+    """
+    dev = _bb_get_device()
+    if dev is None:
+        raise RuntimeError("BitBabbler device not found")
+    if folds and folds > 0:
+        return dev.read_entropy_folded(out_len, folds)
+    return dev.read_entropy(out_len)
 
 
 def popupmsg(msg_title, msg):
@@ -121,16 +124,11 @@ def open_folder():
 
 def check_usb_cap(values):
     if values["bit_ac"]:
-        if values["bit_ac"]:
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f0 -b 1",
-                stdout=subprocess.PIPE, startupinfo=startupinfo)
-            chunk = proc.stdout.read()
-        if chunk:
+        # Use bbpy detection
+        if bb_detect():
             return True
         else:
-            popupmsg("Error", "Check if the the selected device is attached.")
+            popupmsg("Error", "Check if the selected BitBabbler is attached.")
             return False
     elif values['true3_ac']:
         ports_avaiable = list(list_ports.comports())
@@ -145,18 +143,15 @@ def check_usb_cap(values):
             popupmsg("Error", "Check if the the selected device is attached.")
             return False
     elif values["true3_bit_ac"]:
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f0 -b 1", stdout=subprocess.PIPE,
-                                startupinfo=startupinfo)
-        chunk = proc.stdout.read()
+        # Mixed mode: require both BitBabbler and TrueRNG present
+        bb_ok = bb_detect()
         ports_avaiable = list(list_ports.comports())
         rng_com_port = None
         for temp in ports_avaiable:
             if temp[1].startswith("TrueRNG"):
                 if rng_com_port == None:  # always chooses the 1st TrueRNG found
                     rng_com_port = str(temp[0])
-        if rng_com_port and chunk:
+        if rng_com_port and bb_ok:
             return True
         else:
             popupmsg("Error", "Check if the the selected devices are attached.")
@@ -166,15 +161,10 @@ def check_usb_cap(values):
 
 def check_usb_live(values):
     if values['bit_live']:
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(f"src/bin/seedd.exe --limit-max-xfer --no-qa -f0 -b 1",
-            stdout=subprocess.PIPE, startupinfo=startupinfo)
-        chunk = proc.stdout.read()
-        if chunk:
+        if bb_detect():
             return True
         else:
-            popupmsg("Error", "Check if the the selected device is attached.")
+            popupmsg("Error", "Check if the selected BitBabbler is attached.")
             return False       
     elif values['true3_live']:
         ports_avaiable = list(list_ports.comports())

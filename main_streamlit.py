@@ -50,8 +50,7 @@ if 'sample_interval' not in st.session_state:
 if 'csv_ones' not in st.session_state:
     st.session_state.csv_ones = []
 
-# Kill any existing seedd processes
-rm.kill_seedd()
+# No seedd process management needed with bbpy
 
 # Ensure 1-SavedFiles directory exists
 os.makedirs("1-SavedFiles", exist_ok=True)
@@ -284,8 +283,8 @@ def render_live_plot_tab():
         # Device-specific options
         if live_rng_type == "BitBabbler":
             live_xor_mode = st.selectbox(
-                "RAW(0)/XOR (1,2):",
-                options=[0, 1],
+                "RAW(0)/XOR (1,2,3,4):",
+                options=[0, 1, 2, 3, 4],
                 index=0,
                 key="live_xor"
             )
@@ -423,30 +422,22 @@ def collect_bitbabbler_sample(values, file_name):
     """Collect a single BitBabbler sample"""
     sample_value = int(values["ac_bit_count"])
     sample_bytes = int(sample_value / 8)
-    addr, port, max_msg_size = '127.0.0.1', 1200, 32768
+    folds = int(values.get("ac_combo", 0))
     
     try:
-        # Ensure seedd is running before trying to read
-        if not rm.is_seedd_running():
-            # Restart seedd if not running
-            xor_mode = values.get("ac_combo", 0)
-            command = f"src\\bin\\seedd --no-qa -f{xor_mode} --udp-out 127.0.0.1:1200"
-            rm.start_seedd(command)
-            time.sleep(2)  # Give it time to start
-        
         with open(file_name + '.bin', "ab+") as bin_file:
-            chunk = rm.read_from_deamon(addr, port, sample_bytes, max_msg_size)
+            chunk = rm.bb_read_bytes(sample_bytes, folds)
             if chunk:
                 bin_file.write(chunk)
             else:
-                print("No data received from BitBabbler")
+                print("No data received from BitBabbler (bbpy)")
                 return
         
         bin_hex = BitArray(chunk)
         bin_ascii = bin_hex.bin
         
         if not bin_ascii:
-            print("Empty data from BitBabbler")
+            print("Empty data from BitBabbler (bbpy)")
             return
         
         num_ones_array = bin_ascii.count('1')
@@ -460,15 +451,8 @@ def collect_bitbabbler_sample(values, file_name):
         })
         
     except Exception as e:
-        print(f"BitBabbler collection error: {e}")
-        # Don't stop collection immediately, try to recover
-        if "10054" in str(e) or "connection" in str(e).lower():
-            print("Connection error detected, attempting to restart seedd...")
-            rm.kill_seedd()
-            time.sleep(1)
-            # Will retry on next sample
-        else:
-            st.session_state.collecting = False
+        print(f"BitBabbler collection error (bbpy): {e}")
+        st.session_state.collecting = False
 
 def collect_trng3_sample(values, file_name):
     """Collect a single TrueRNG3 sample"""
@@ -567,9 +551,10 @@ def start_data_collection(rng_type, xor_mode, sample_size, sample_interval):
             st.error("❌ Device check failed. Please ensure your device is connected.")
         return
     
-    # Generate filename
-    device_suffix = "bitb" if values["bit_ac"] else "trng" if values["true3_ac"] else "pseudo"
-    file_name = time.strftime(f"%Y%m%dT%H%M%S_{device_suffix}_s{sample_size}_i{sample_interval}")
+    # Generate filename (include fold for BitBabbler)
+    device_suffix = "bitb" if (values["bit_ac"] or values["true3_bit_ac"]) else "trng" if values["true3_ac"] else "pseudo"
+    fold_suffix = f"_f{xor_mode}" if (values["bit_ac"] or values["true3_bit_ac"]) else ""
+    file_name = time.strftime(f"%Y%m%dT%H%M%S_{device_suffix}_s{sample_size}_i{sample_interval}{fold_suffix}")
     file_name = f"1-SavedFiles/{file_name}"
     
     # Start collection
@@ -581,15 +566,7 @@ def start_data_collection(rng_type, xor_mode, sample_size, sample_interval):
     st.session_state.sample_interval = sample_interval
     st.session_state.last_update_time = datetime.now()
     
-    # Start seedd process for BitBabbler if needed
-    if values["bit_ac"] or values["true3_bit_ac"]:
-        # Kill any existing seedd processes first
-        rm.kill_seedd()
-        time.sleep(1)
-        
-        command = f"src\\bin\\seedd --no-qa -f{xor_mode} --udp-out 127.0.0.1:1200"
-        rm.start_seedd(command)
-        time.sleep(int(xor_mode)) if int(xor_mode) != 0 else time.sleep(2)
+    # No seedd needed when using bbpy
     
     st.success("✅ Data collection started!")
     st.rerun()
@@ -597,7 +574,7 @@ def start_data_collection(rng_type, xor_mode, sample_size, sample_interval):
 def stop_data_collection():
     """Stop data collection process"""
     st.session_state.collecting = False
-    rm.kill_seedd()
+    # Nothing to kill for bbpy
     st.success("⏹️ Data collection stopped!")
     # Force rerun to update fragments
     st.rerun()
@@ -632,30 +609,22 @@ def collect_live_bitbabbler_sample(values, file_name):
     """Collect a single live BitBabbler sample"""
     sample_value = int(values["live_bit_count"])
     sample_bytes = int(sample_value / 8)
-    addr, port, max_msg_size = '127.0.0.1', 1200, 32768
+    folds = int(values.get("live_combo", 0))
     
     try:
-        # Ensure seedd is running before trying to read
-        if not rm.is_seedd_running():
-            # Restart seedd if not running
-            xor_mode = values.get("live_combo", 0)
-            command = f"src\\bin\\seedd --no-qa -f{xor_mode} --udp-out 127.0.0.1:1200"
-            rm.start_seedd(command)
-            time.sleep(2)  # Give it time to start
-        
         with open(file_name + '.bin', "ab+") as bin_file:
-            chunk = rm.read_from_deamon(addr, port, sample_bytes, max_msg_size)
+            chunk = rm.bb_read_bytes(sample_bytes, folds)
             if chunk:
                 bin_file.write(chunk)
             else:
-                print("No data received from BitBabbler")
+                print("No data received from BitBabbler (bbpy)")
                 return
         
         bin_hex = BitArray(chunk)
         bin_ascii = bin_hex.bin
         
         if not bin_ascii:
-            print("Empty data from BitBabbler")
+            print("Empty data from BitBabbler (bbpy)")
             return
         
         num_ones_array = bin_ascii.count('1')
@@ -673,15 +642,8 @@ def collect_live_bitbabbler_sample(values, file_name):
         st.session_state.index_data.append(index_number)
         
     except Exception as e:
-        print(f"Live BitBabbler error: {e}")
-        # Don't stop plotting immediately, try to recover
-        if "10054" in str(e) or "connection" in str(e).lower():
-            print("Connection error detected, attempting to restart seedd...")
-            rm.kill_seedd()
-            time.sleep(1)
-            # Will retry on next sample
-        else:
-            st.session_state.live_plotting = False
+        print(f"Live BitBabbler error (bbpy): {e}")
+        st.session_state.live_plotting = False
 
 def collect_live_trng3_sample(values, file_name):
     """Collect a single live TrueRNG3 sample"""
@@ -787,9 +749,10 @@ def start_live_plotting(rng_type, xor_mode, sample_size, sample_interval):
             st.error("❌ Device check failed. Please ensure your device is connected.")
         return
     
-    # Generate filename
+    # Generate filename (include fold for BitBabbler)
     device_suffix = "bitb" if values["bit_live"] else "trng" if values["true3_live"] else "pseudo"
-    file_name = time.strftime(f"%Y%m%dT%H%M%S_{device_suffix}_s{sample_size}_i{sample_interval}")
+    fold_suffix = f"_f{xor_mode}" if values["bit_live"] else ""
+    file_name = time.strftime(f"%Y%m%dT%H%M%S_{device_suffix}_s{sample_size}_i{sample_interval}{fold_suffix}")
     file_name = f"1-SavedFiles/{file_name}"
     
     # Start live plotting
@@ -803,15 +766,7 @@ def start_live_plotting(rng_type, xor_mode, sample_size, sample_interval):
     st.session_state.sample_interval = sample_interval
     st.session_state.last_update_time = datetime.now()
     
-    # Start seedd process for BitBabbler if needed
-    if values['bit_live']:
-        # Kill any existing seedd processes first
-        rm.kill_seedd()
-        time.sleep(1)
-        
-        command = f"src\\bin\\seedd --no-qa -f{xor_mode} --udp-out 127.0.0.1:1200"
-        rm.start_seedd(command)
-        time.sleep(int(xor_mode)) if int(xor_mode) != 0 else time.sleep(2)
+    # No seedd needed when using bbpy
     
     st.success("✅ Live plotting started!")
     st.rerun()
@@ -819,7 +774,7 @@ def start_live_plotting(rng_type, xor_mode, sample_size, sample_interval):
 def stop_live_plotting():
     """Stop live plotting process"""
     st.session_state.live_plotting = False
-    rm.kill_seedd()
+    # Nothing to kill for bbpy
     st.success("⏹️ Live plotting stopped!")
     # Force rerun to update fragments
     st.rerun()
