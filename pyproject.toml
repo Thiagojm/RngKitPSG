@@ -11,6 +11,7 @@ dependencies = [
     "plotly>=6.3.0",
     "psutil>=7.0.0",
     "pyserial>=3.5",
+    "pyusb>=1.2.1",
     "streamlit>=1.49.1",
     "xlsxwriter>=3.2.5",
 ]

@@ -10,15 +10,28 @@ This script can read random bytes from a connected BitBabbler device (via
 
 These are sanity checks, not a substitute for full suites like NIST STS or
 Dieharder. For reliable assessment, use larger samples (e.g., multiple MB).
+
+Examples:
+    # Test 1KB from connected BitBabbler device:
+    uv run -m tests.randomness_tests --bytes 1024
+
+    # Test from file with XOR folding:
+    uv run -m tests.randomness_tests --bytes 2048 --fold 2
+
+    # Test data from a binary file:
+    uv run -m tests.randomness_tests --file random_data.bin
+
+    # Test data from a hex string file:
+    uv run -m tests.randomness_tests --file hex_data.txt --hex
 """
 
 import argparse
 import math
 import sys
-from typing import Tuple, Optional
+from typing import Tuple
 
 try:
-    from bbpy.bitbabbler import BitBabbler
+    from modules.bbpy.bitbabbler import BitBabbler
 except Exception:
     BitBabbler = None  # type: ignore
 

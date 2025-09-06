@@ -8,11 +8,24 @@ module) and prints the random value as:
 
 Use --bits/-b to choose the bit length (must be a multiple of 8) and
 --folds/-f to apply XOR folding before output.
+
+Examples:
+    # Read default 2048 bits (256 bytes) from device:
+    uv run -m tests.get_bits
+
+    # Read 1024 bits with short options:
+    uv run -m tests.get_bits -b 1024
+
+    # Read 4096 bits with 3-fold XOR:
+    uv run -m tests.get_bits --bits 4096 --folds 3
+
+    # Read 512 bits with 2-fold XOR:
+    uv run -m tests.get_bits -b 512 -f 2
 """
 import sys
 import argparse
 
-from bbpy.bitbabbler import BitBabbler
+from modules.bbpy.bitbabbler import BitBabbler
 
 
 def parse_args() -> argparse.Namespace:
